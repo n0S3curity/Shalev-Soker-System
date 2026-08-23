@@ -1,8 +1,9 @@
 """Excel exports and the daily-report settings screen (admin only)."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
+from zoneinfo import ZoneInfo
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
@@ -15,6 +16,9 @@ from ..models import AppSettingsOut, AppSettingsUpdate
 from ..services import excel, mailer, reports
 
 router = APIRouter(prefix="/api", tags=["exports"])
+
+NONE_LABEL = "—"
+REMOVED_LABEL = "הוסר"
 
 XLSX_MEDIA = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -168,26 +172,176 @@ async def list_audit(
 
 @router.get("/stats")
 async def dashboard_stats(admin: CurrentUser = Depends(admin_user)) -> dict[str, Any]:
-    total = await db.surveys().count_documents({"deleted": False})
+    """Everything the admin dashboard draws, in one round trip.
+
+    Day buckets are computed in the configured timezone rather than in UTC, so
+    "today" on the dashboard means the same day it means to the surveyor.
+    """
+    tz = settings.timezone
+    live = {"deleted": False}
+    now = datetime.now(timezone.utc)
+    day_start = now - timedelta(days=1)
+    week_start = now - timedelta(days=7)
+    month_start = now - timedelta(days=30)
+
+    total = await db.surveys().count_documents(live)
     users_count = await db.users().count_documents({"active": True})
     cities_count = await db.cities().count_documents({"active": True})
+    today_count = await db.surveys().count_documents({**live, "created_at": {"$gte": day_start}})
+    week_count = await db.surveys().count_documents({**live, "created_at": {"$gte": week_start}})
+    month_count = await db.surveys().count_documents({**live, "created_at": {"$gte": month_start}})
+    signed_count = await db.surveys().count_documents({**live, "signature_id": {"$ne": None}})
 
-    by_city_cursor = db.surveys().aggregate([
-        {"$match": {"deleted": False}},
-        {"$group": {"_id": "$city", "n": {"$sum": 1}}},
-        {"$sort": {"n": -1}},
+    async def grouped(field: str, limit: int = 0) -> list[dict[str, Any]]:
+        stages: list[dict[str, Any]] = [
+            {"$match": live},
+            {"$group": {"_id": f"${field}", "n": {"$sum": 1}}},
+            {"$sort": {"n": -1}},
+        ]
+        if limit:
+            stages.append({"$limit": limit})
+        return [
+            {"label": r["_id"] or NONE_LABEL, "count": r["n"]}
+            async for r in db.surveys().aggregate(stages)
+        ]
+
+    # ── attachment and container totals in one pass ────────────────────────
+    totals = await db.surveys().aggregate([
+        {"$match": live},
+        {"$group": {
+            "_id": None,
+            "images": {"$sum": {"$size": {"$ifNull": ["$image_ids", []]}}},
+            "docs": {"$sum": {"$size": {"$ifNull": ["$doc_ids", []]}}},
+            "container_rows": {"$sum": {"$size": {"$ifNull": ["$containers", []]}}},
+            "container_qty": {"$sum": {
+                "$reduce": {
+                    "input": {"$ifNull": ["$containers", []]},
+                    "initialValue": 0,
+                    "in": {"$add": ["$$value", {"$ifNull": ["$$this.qty", 0]}]},
+                },
+            }},
+            "with_images": {"$sum": {"$cond": [
+                {"$gt": [{"$size": {"$ifNull": ["$image_ids", []]}}, 0]}, 1, 0]}},
+        }},
+    ]).to_list(length=1)
+    agg = totals[0] if totals else {}
+
+    # ── surveys per day for the last 30 days, zero filled so the line is even ─
+    per_day = db.surveys().aggregate([
+        {"$match": {**live, "created_at": {"$gte": month_start}}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$created_at", "timezone": tz}},
+            "n": {"$sum": 1},
+        }},
     ])
-    by_user_cursor = db.surveys().aggregate([
-        {"$match": {"deleted": False}},
-        {"$group": {"_id": "$owner_name", "n": {"$sum": 1}}},
-        {"$sort": {"n": -1}},
-        {"$limit": 20},
-    ])
+    counted = {r["_id"]: r["n"] async for r in per_day}
+    today_local = now.astimezone(ZoneInfo(tz)).date()
+    by_day = []
+    for offset in range(29, -1, -1):
+        key = (today_local - timedelta(days=offset)).isoformat()
+        by_day.append({"day": key, "count": counted.get(key, 0)})
+
+    # ── container mix: surveys using each type, and total units deployed ───
+    by_container = [
+        {"label": r["_id"] or NONE_LABEL, "count": r["surveys"], "qty": r["qty"]}
+        async for r in db.surveys().aggregate([
+            {"$match": live},
+            {"$unwind": "$containers"},
+            {"$group": {
+                "_id": "$containers.ctype",
+                "surveys": {"$addToSet": "$_id"},
+                "qty": {"$sum": {"$ifNull": ["$containers.qty", 0]}},
+            }},
+            {"$project": {"surveys": {"$size": "$surveys"}, "qty": 1}},
+            {"$sort": {"qty": -1}},
+        ])
+    ]
+
+    # ── per surveyor detail, merged onto the user list in Python ───────────
+    by_owner = {
+        r["_id"]: r
+        async for r in db.surveys().aggregate([
+            {"$match": live},
+            {"$group": {
+                "_id": "$owner_email",
+                "total": {"$sum": 1},
+                "d7": {"$sum": {"$cond": [{"$gte": ["$created_at", week_start]}, 1, 0]}},
+                "d30": {"$sum": {"$cond": [{"$gte": ["$created_at", month_start]}, 1, 0]}},
+                "signed": {"$sum": {"$cond": [{"$ne": ["$signature_id", None]}, 1, 0]}},
+                "images": {"$sum": {"$size": {"$ifNull": ["$image_ids", []]}}},
+                "cities": {"$addToSet": "$city"},
+                "last_survey_at": {"$max": "$created_at"},
+            }},
+        ])
+    }
+
+    def person(email: str, name: str, role: str, active: bool, last_login, stat) -> dict[str, Any]:
+        return {
+            "email": email,
+            "name": name,
+            "role": role,
+            "active": active,
+            "last_login": last_login,
+            "total": stat.get("total", 0),
+            "d7": stat.get("d7", 0),
+            "d30": stat.get("d30", 0),
+            "signed": stat.get("signed", 0),
+            "images": stat.get("images", 0),
+            "cities": sorted(c for c in stat.get("cities", []) if c),
+            "last_survey_at": stat.get("last_survey_at"),
+        }
+
+    people = []
+    async for record in db.users().find({}, {"password": 0}):
+        email = record.get("email", "")
+        people.append(person(
+            email,
+            record.get("name") or email,
+            record.get("role", "user"),
+            bool(record.get("active", True)),
+            record.get("last_login"),
+            by_owner.pop(email, {}),
+        ))
+    # surveys whose author has since been deleted still deserve a row
+    for email, stat in by_owner.items():
+        label = email or NONE_LABEL
+        people.append(person(label, f"{label} ({REMOVED_LABEL})", "user", False, None, stat))
+    people.sort(key=lambda p: (-p["total"], p["name"]))
+
+    by_user = [
+        {"user": r["_id"] or NONE_LABEL, "count": r["n"]}
+        async for r in db.surveys().aggregate([
+            {"$match": live},
+            {"$group": {"_id": "$owner_name", "n": {"$sum": 1}}},
+            {"$sort": {"n": -1}},
+            {"$limit": 20},
+        ])
+    ]
 
     return {
         "total_surveys": total,
         "active_users": users_count,
         "active_cities": cities_count,
-        "by_city": [{"city": r["_id"] or "—", "count": r["n"]} async for r in by_city_cursor],
-        "by_user": [{"user": r["_id"] or "—", "count": r["n"]} async for r in by_user_cursor],
+        "surveys_today": today_count,
+        "surveys_7d": week_count,
+        "surveys_30d": month_count,
+        "signed_surveys": signed_count,
+        "surveys_with_images": agg.get("with_images", 0),
+        "total_images": agg.get("images", 0),
+        "total_docs": agg.get("docs", 0),
+        "container_rows": agg.get("container_rows", 0),
+        "container_units": agg.get("container_qty", 0),
+        "by_city": [{"city": r["label"], "count": r["count"]} for r in await grouped("city")],
+        "by_user": by_user,
+        "by_day": by_day,
+        "by_sector": await grouped("sector"),
+        "by_biz_type": await grouped("biz_type_std", limit=10),
+        "by_kitchen": await grouped("kitchen"),
+        "by_yard": await grouped("yard"),
+        "by_wet": await grouped("wet"),
+        "by_cardboard": await grouped("cardboard"),
+        "by_decl_given": await grouped("decl_given"),
+        "by_decl_returned": await grouped("decl_ret"),
+        "by_container": by_container,
+        "users": people,
     }

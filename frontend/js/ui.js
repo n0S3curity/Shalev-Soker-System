@@ -48,6 +48,147 @@ window.UI = (function () {
     return node;
   }
 
+  /* ── Theme ──────────────────────────────────────────────────────── */
+  /* Three states so the user can go back to following the OS setting:
+     auto -> light -> dark -> auto. The stylesheet carries the light palette
+     on :root, the dark one behind both a prefers-color-scheme query and a
+     [data-theme="dark"] attribute, so "auto" is simply the absence of the
+     attribute. */
+  const THEME_KEY = 'sv_theme';
+  const THEME_ORDER = ['auto', 'light', 'dark'];
+  const THEME_FACE = {
+    auto: { icon: '\u25D0', label: '\u05ea\u05e6\u05d5\u05d2\u05d4: \u05dc\u05e4\u05d9 \u05d4\u05de\u05e2\u05e8\u05db\u05ea' },
+    light: { icon: '\u2600', label: '\u05ea\u05e6\u05d5\u05d2\u05d4: \u05d1\u05d4\u05d9\u05e8\u05d4' },
+    dark: { icon: '\u263D', label: '\u05ea\u05e6\u05d5\u05d2\u05d4: \u05db\u05d4\u05d4' }
+  };
+  const BAR_COLOR = { light: '#F7F6F3', dark: '#191A17' };
+
+  const theme = {
+    mode: 'auto',
+    query: null,
+
+    read() {
+      try {
+        const stored = localStorage.getItem(THEME_KEY);
+        return THEME_ORDER.indexOf(stored) >= 0 ? stored : 'auto';
+      } catch (err) {
+        return 'auto';
+      }
+    },
+
+    resolved() {
+      if (this.mode !== 'auto') return this.mode;
+      return this.query && this.query.matches ? 'dark' : 'light';
+    },
+
+    apply() {
+      const root = document.documentElement;
+      if (this.mode === 'auto') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', this.mode);
+
+      const resolved = this.resolved();
+      root.style.colorScheme = resolved;
+
+      // A stored choice has to beat the media scoped meta tags in the head,
+      // so drop their media attribute and drive both from here.
+      qsa('meta[name="theme-color"]').forEach((tag) => {
+        tag.removeAttribute('media');
+        tag.setAttribute('content', BAR_COLOR[resolved]);
+      });
+
+      const button = $('btn-theme');
+      if (button) {
+        const face = THEME_FACE[this.mode];
+        button.textContent = face.icon;
+        button.title = face.label;
+        button.setAttribute('aria-label', face.label);
+      }
+    },
+
+    cycle() {
+      this.mode = THEME_ORDER[(THEME_ORDER.indexOf(this.mode) + 1) % THEME_ORDER.length];
+      try { localStorage.setItem(THEME_KEY, this.mode); } catch (err) { /* private mode */ }
+      this.apply();
+      toast(THEME_FACE[this.mode].label, 'info');
+    },
+
+    init() {
+      this.mode = this.read();
+      if (window.matchMedia) {
+        this.query = window.matchMedia('(prefers-color-scheme: dark)');
+        const onChange = () => { if (this.mode === 'auto') this.apply(); };
+        if (this.query.addEventListener) this.query.addEventListener('change', onChange);
+        else if (this.query.addListener) this.query.addListener(onChange);
+      }
+      this.apply();
+    }
+  };
+
+  /* ── SVG ────────────────────────────────────────────────────────── */
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  /* Same shape as el(), but in the SVG namespace. createElement() would
+     produce an unknown HTML element that never renders. */
+  function svg(tag, attrs, children) {
+    const node = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs || {}).forEach((key) => {
+      const value = attrs[key];
+      if (value === null || value === undefined || value === false) return;
+      if (key === 'text') node.textContent = value;
+      else if (key.slice(0, 2) === 'on' && typeof value === 'function') {
+        node.addEventListener(key.slice(2), value);
+      } else node.setAttribute(key, value);
+    });
+    (children || []).forEach((child) => {
+      if (child === null || child === undefined) return;
+      node.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
+    });
+    return node;
+  }
+
+  /* ── Clipboard ──────────────────────────────────────────────────── */
+  /* navigator.clipboard only exists in a secure context, so over plain HTTP
+     it is undefined and the copy silently fails. Fall back to a throwaway
+     textarea plus execCommand, which has no such restriction. */
+  async function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) { /* fall through to the legacy path */ }
+    }
+    try {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.top = '0';
+      area.style.insetInlineStart = '-9999px';
+      document.body.appendChild(area);
+      area.focus();
+      area.select();
+      area.setSelectionRange(0, area.value.length);
+      const copied = document.execCommand('copy');
+      document.body.removeChild(area);
+      return copied;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  /* Last resort when both copy paths fail: put the caret around the text so
+     the user only has to press Ctrl+C. */
+  function selectText(node) {
+    if (!node) return;
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (err) { /* selection is a nicety, never fatal */ }
+  }
+
   /* ── Toast ──────────────────────────────────────────────────────── */
   let toastTimer = null;
   function toast(message, kind) {
@@ -206,6 +347,7 @@ window.UI = (function () {
   };
 
   function bindGlobal() {
+    theme.init();
     $('camera-close').addEventListener('click', () => camera.finish(null));
     $('camera-shoot').addEventListener('click', () => camera.shoot());
     $('camera-flip').addEventListener('click', () => camera.flip());
@@ -222,6 +364,8 @@ window.UI = (function () {
 
   return {
     $: $, qs: qs, qsa: qsa, el: el, esc: esc, show: show, clear: clear,
+    svg: svg, copyText: copyText, selectText: selectText,
+    theme: theme,
     toast: toast, busy: busy, confirm: confirmBox, lightbox: lightbox,
     formatDate: formatDate, formatSize: formatSize,
     downscaleImage: downscaleImage, camera: camera, bindGlobal: bindGlobal,

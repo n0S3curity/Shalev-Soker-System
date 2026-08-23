@@ -693,8 +693,12 @@ window.SurveyForm = (function () {
     });
     $('btn-clear-search').addEventListener('click', () => reset(false));
     $('btn-form-reset').addEventListener('click', async () => {
-      const ok = await UI.confirm('ניקוי הטופס', 'כל הנתונים שהוזנו ולא נשמרו יימחקו. להמשיך?', 'נקה');
-      if (ok) reset(false);
+      const ok = await UI.confirm('ניקוי הטופס',
+        'כל הנתונים שהוזנו ולא נשמרו יימחקו, ותואר שוב בחירת רשות. להמשיך?', 'נקה');
+      if (!ok) return;
+      reset(false);
+      // Clearing the form starts a new survey, so the authority is asked again
+      App.setCity(null, false);
     });
     $('btn-save').addEventListener('click', save);
 

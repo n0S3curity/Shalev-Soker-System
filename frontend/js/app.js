@@ -10,16 +10,15 @@ window.App = (function () {
 
   const $ = UI.$;
   const el = UI.el;
-  const CITY_KEY = 'sv_city';
 
   const TABS = {
     dashboard: { label: '📊 לוח בקרה', panel: 'panel-dashboard', admin: true },
-    city:      { label: '🏙️ רשות',     panel: 'panel-city' },
+    city:      { label: '🏙️ בחירת רשות', panel: 'panel-city' },
     form:      { label: '📋 סקר',       panel: 'panel-form' },
     records:   { label: '🗂️ רשומות',   panel: 'panel-records' },
     users:     { label: '👥 משתמשים',  panel: 'panel-users', admin: true },
     cities:    { label: '🗺️ רשויות',   panel: 'panel-cities', admin: true },
-    export:    { label: '📊 ייצוא',     panel: 'panel-export', admin: true },
+    export:    { label: '📊 ייצוא לאקסל', panel: 'panel-export', admin: true },
     settings:  { label: '⚙️ הגדרות',   panel: 'panel-settings', admin: true },
     account:   { label: '🔑 הסיסמה שלי', panel: 'panel-account' }
   };
@@ -68,7 +67,7 @@ window.App = (function () {
     if (tab === 'settings') { Admin.loadSettings(); Admin.loadAudit(); }
     if (tab === 'dashboard') Admin.loadDashboard();
     if (tab === 'city') renderCityPicker();
-    if (tab === 'form') applyFormGate();
+    if (tab === 'form') { expireIdleCity(); applyFormGate(); }
     if (tab === 'export') Admin.renderExportChips(app.cities);
     if (tab === 'account') Admin.loadAccount();
   }
@@ -130,6 +129,17 @@ window.App = (function () {
      a chooser until one is active. Before this gate existed you could fill the
      whole form and only be told at save time - and picking a city at that
      point reset everything that had been typed. */
+  /* Starting a new survey always means confirming the authority again. The
+     city is kept only while there is live work on screen - part filled input,
+     or a saved record being viewed - so a surveyor mid-form is never
+     interrupted, but an idle return to the tab goes back to the chooser. */
+  function expireIdleCity() {
+    if (!app.city) return;
+    if (SurveyForm.isNewAndDirty()) return;
+    if (SurveyForm.state && SurveyForm.state.surveyId) return;
+    setCity(null, false);
+  }
+
   function applyFormGate() {
     const missing = !app.city;
     UI.show($('form-city-gate'), missing);
@@ -138,8 +148,6 @@ window.App = (function () {
 
   function setCity(name, navigate) {
     app.city = name;
-    if (name) localStorage.setItem(CITY_KEY, name);
-    else localStorage.removeItem(CITY_KEY);
 
     $('f_city').value = name || '';
     refreshCounts();
@@ -189,26 +197,18 @@ window.App = (function () {
     await SurveyForm.loadCatalog();
     await loadCities();
 
-    const stored = localStorage.getItem(CITY_KEY);
-    if (stored && app.cities.some((city) => city.name === stored)) {
-      app.city = stored;
-      $('f_city').value = stored;
-      refreshCounts();
-    }
-
-    if (user.role === 'admin') {
-      go('dashboard');
-    } else if (app.city) {
-      SurveyForm.reset(false);
-      go('form');
-    } else {
-      go('city');
-    }
+    // The active city is deliberately not remembered between sessions. It used
+    // to be restored from localStorage, which silently pre-filled yesterday's
+    // city and made it easy to file a survey under the wrong authority.
+    go(user.role === 'admin' ? 'dashboard' : 'city');
   }
 
   /* ── Boot ──────────────────────────────────────────────────────── */
   async function boot() {
     UI.bindGlobal();
+    // Older builds cached the active city here. Nothing reads it any more,
+    // so clear it rather than leave stale state in the browser.
+    try { localStorage.removeItem('sv_city'); } catch (err) { /* private mode */ }
     SurveyForm.bind();
     Records.bind();
     Admin.bind();
@@ -218,6 +218,7 @@ window.App = (function () {
       if (ok) Auth.logout();
     });
     $('tb-city').addEventListener('click', () => go('city'));
+    $('btn-theme').addEventListener('click', () => UI.theme.cycle());
 
     document.addEventListener('session-expired', () => {
       UI.toast('פג תוקף החיבור. מתחבר מחדש…', 'err');

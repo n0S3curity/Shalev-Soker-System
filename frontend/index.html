@@ -127,6 +127,8 @@
     <div class="tb-right">
       <span class="tb-city" id="tb-city">—</span>
       <span class="tb-user" id="tb-user"></span>
+      <button class="tb-theme" id="btn-theme" type="button"
+              title="מצב תצוגה" aria-label="החלפת מצב תצוגה"></button>
       <button class="tb-out" id="btn-logout">יציאה ✕</button>
     </div>
   </div>
@@ -400,9 +402,18 @@
           <div class="cred-row"><span class="cred-key">סיסמה חד-פעמית</span>
             <code class="cred-val cred-pw" id="cred-password"></code></div>
           <button class="btn btn-s btn-sm" id="btn-copy-cred">📋 העתק פרטי כניסה</button>
+          <pre class="cred-fallback hidden" id="cred-fallback"></pre>
+          <div class="cred-steps">
+            <div class="cred-steps-t">מה למסור למשתמש</div>
+            <ol>
+              <li>להיכנס לכתובת המערכת מהדפדפן.</li>
+              <li>להזין את כתובת המייל והסיסמה החד-פעמית שלמעלה.</li>
+              <li>בכניסה הראשונה המערכת תבקש לבחור סיסמה קבועה.</li>
+              <li>אחרי הכניסה — לבחור רשות מקומית ולהתחיל למלא סקרים.</li>
+            </ol>
+          </div>
           <div class="cred-note">
-            הסיסמה מוצגת פעם אחת בלבד ולא ניתן לשחזר אותה.
-            המשתמש יתבקש לבחור סיסמה קבועה בכניסה הראשונה.
+            הסיסמה מוצגת פעם אחת בלבד ולא ניתן לשחזר אותה — העתיקו אותה לפני סגירת החלון.
             אם הוגדר SMTP, הפרטים נשלחו גם למייל שלו.
           </div>
         </div>
@@ -512,13 +523,59 @@
   <section id="panel-dashboard" class="panel hidden">
     <div class="es">
       <div class="stat-grid" id="stat-grid"></div>
+
+      <div class="cb2">
+        <div class="ch2">📈 סקרים ב־30 הימים האחרונים</div>
+        <div class="chart-pad" id="stat-trend"></div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="cb2">
+          <div class="ch2">🏭 מרכיב התאמה</div>
+          <div class="chart-pad" id="stat-sector"></div>
+        </div>
+        <div class="cb2">
+          <div class="ch2">✍️ מצב הסקרים</div>
+          <div class="chart-pad" id="stat-completeness"></div>
+        </div>
+        <div class="cb2">
+          <div class="ch2">🚛 פסולת מעורבת רטובה</div>
+          <div class="chart-pad" id="stat-wet"></div>
+        </div>
+        <div class="cb2">
+          <div class="ch2">📦 פסולת קרטון</div>
+          <div class="chart-pad" id="stat-cardboard"></div>
+        </div>
+      </div>
+
       <div class="cb2">
         <div class="ch2">🏙️ סקרים לפי רשות</div>
         <div id="stat-cities"></div>
       </div>
+
+      <div class="cb2">
+        <div class="ch2">🏷️ מהות העסק — 10 המובילים</div>
+        <div id="stat-biztypes"></div>
+      </div>
+
+      <div class="cb2">
+        <div class="ch2">🗑️ כלי אצירה — סך היחידות שנספרו</div>
+        <div id="stat-containers"></div>
+      </div>
+
+      <div class="cb2">
+        <div class="ch2">🍽️ מטבח פעיל וחצר</div>
+        <div class="dash-split" id="stat-facilities"></div>
+      </div>
+
       <div class="cb2">
         <div class="ch2">👤 סקרים לפי סוקר</div>
         <div id="stat-users"></div>
+      </div>
+
+      <div class="cb2">
+        <div class="ch2">📋 ביצועי סוקרים</div>
+        <div class="table-scroll"><table class="dt" id="stat-user-table"></table></div>
       </div>
     </div>
   </section>
