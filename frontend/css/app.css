@@ -617,6 +617,13 @@ body{
 .bar-n{font-size:12px;color:var(--text-2);min-width:30px;text-align:left;
   font-variant-numeric:tabular-nums}
 .set-status{font-size:12.5px;color:var(--text-3);margin-top:12px;line-height:1.65}
+/* The audit log returns 60 entries, which used to stretch the settings
+   page to an unusable length. Give it its own scroll box instead. */
+.log-scroll{max-height:340px;overflow-y:auto;overscroll-behavior:contain}
+.log-scroll::-webkit-scrollbar{width:10px}
+.log-scroll::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:var(--r-full);
+  border:3px solid var(--surface)}
+.log-scroll::-webkit-scrollbar-track{background:transparent}
 .audit-row{padding:10px 16px;border-bottom:1px solid var(--border);font-size:12.5px;line-height:1.65}
 .audit-row:last-child{border-bottom:none}
 .audit-act{font-weight:650;color:var(--brand-text)}
@@ -707,11 +714,11 @@ body{
 
 /* donut */
 .donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.donut{width:132px;height:132px;flex-shrink:0;transform:rotate(-90deg) scaleX(-1)}
+.donut{width:132px;height:132px;flex-shrink:0}
 .donut-track{fill:none;stroke:var(--surface-3);stroke-width:4.2}
 .donut-seg{fill:none;stroke-width:4.2;transition:stroke-dasharray .5s var(--ease)}
-.donut-mid{transform:rotate(90deg) scaleX(-1);transform-origin:21px 21px;
-  font-size:7px;font-weight:700;fill:var(--text);font-family:inherit}
+.donut-mid{font-size:7px;font-weight:700;fill:var(--text);font-family:inherit;
+  direction:ltr;unicode-bidi:isolate}
 .donut-legend{flex:1;min-width:150px;display:flex;flex-direction:column;gap:9px}
 .dl-row{display:flex;align-items:center;gap:9px;font-size:12.5px}
 .dl-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}

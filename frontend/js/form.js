@@ -640,7 +640,7 @@ window.SurveyForm = (function () {
   async function save() {
     if (!state.canEdit) return;
     if (!value('f_bn') || !value('f_bid') || !value('f_addr')) {
-      return UI.toast('יש למלא שם עסק, מספר ח.פ וכתובת', 'err');
+      return UI.toast('מלא שם עסק, מספר ח.פ וכתובת', 'err');
     }
     if (!$('f_city').value) return UI.toast('בחר רשות מקומית לפני השמירה', 'err');
 
@@ -694,7 +694,7 @@ window.SurveyForm = (function () {
     $('btn-clear-search').addEventListener('click', () => reset(false));
     $('btn-form-reset').addEventListener('click', async () => {
       const ok = await UI.confirm('ניקוי הטופס',
-        'כל הנתונים שהוזנו ולא נשמרו יימחקו, ותואר שוב בחירת רשות. להמשיך?', 'נקה');
+        'כל מה שמילאת ולא נשמר יימחק, ותחזור לבחירת רשות. להמשיך?', 'נקה');
       if (!ok) return;
       reset(false);
       // Clearing the form starts a new survey, so the authority is asked again

@@ -30,6 +30,10 @@ window.App = (function () {
   const app = {
     user: null,
     city: null,
+    // true while the city on screen was picked for the form the user is
+    // on right now, which is what separates "just chose one" from
+    // "came back to an idle tab". Cleared on leaving the survey tab.
+    cityPicked: false,
     adminEmail: '',
     cities: [],
     current: null
@@ -52,6 +56,7 @@ window.App = (function () {
     if (!TABS[tab]) return;
     if (TABS[tab].admin && app.user.role !== 'admin') return;
 
+    if (app.current === 'form' && tab !== 'form') app.cityPicked = false;
     app.current = tab;
     Object.keys(TABS).forEach((key) => {
       UI.show($(TABS[key].panel), key === tab);
@@ -135,6 +140,7 @@ window.App = (function () {
      interrupted, but an idle return to the tab goes back to the chooser. */
   function expireIdleCity() {
     if (!app.city) return;
+    if (app.cityPicked) return;
     if (SurveyForm.isNewAndDirty()) return;
     if (SurveyForm.state && SurveyForm.state.surveyId) return;
     setCity(null, false);
@@ -148,6 +154,7 @@ window.App = (function () {
 
   function setCity(name, navigate) {
     app.city = name;
+    if (!name) app.cityPicked = false;
 
     $('f_city').value = name || '';
     refreshCounts();
@@ -155,6 +162,7 @@ window.App = (function () {
     applyFormGate();
 
     if (!navigate) return;
+    app.cityPicked = true;
 
     // Choosing a city must never throw away work in progress. A part filled
     // new survey keeps everything and simply adopts the city; only a loaded

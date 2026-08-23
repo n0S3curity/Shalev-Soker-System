@@ -57,9 +57,9 @@ window.UI = (function () {
   const THEME_KEY = 'sv_theme';
   const THEME_ORDER = ['auto', 'light', 'dark'];
   const THEME_FACE = {
-    auto: { icon: '\u25D0', label: '\u05ea\u05e6\u05d5\u05d2\u05d4: \u05dc\u05e4\u05d9 \u05d4\u05de\u05e2\u05e8\u05db\u05ea' },
-    light: { icon: '\u2600', label: '\u05ea\u05e6\u05d5\u05d2\u05d4: \u05d1\u05d4\u05d9\u05e8\u05d4' },
-    dark: { icon: '\u263D', label: '\u05ea\u05e6\u05d5\u05d2\u05d4: \u05db\u05d4\u05d4' }
+    auto: { icon: '◐', label: 'תצוגה: לפי המערכת' },
+    light: { icon: '☀', label: 'תצוגה: בהירה' },
+    dark: { icon: '☽', label: 'תצוגה: כהה' }
   };
   const BAR_COLOR = { light: '#F7F6F3', dark: '#191A17' };
 
