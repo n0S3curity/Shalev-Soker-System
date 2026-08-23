@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#173404"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
+<title>מערכת סקרים עירוניים</title>
+<link rel="stylesheet" href="/static/css/app.css"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23639922' d='M12 2L2 7l10 5 10-5-10-5z'/%3E%3C/svg%3E"/>
+</head>
+<body>
+
+<!-- ══════════════════ LOADING ══════════════════ -->
+<div id="screen-boot" class="boot">
+  <div class="boot-logo"></div>
+  <div class="boot-text">טוען את המערכת…</div>
+</div>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="screen-login" class="login hidden">
+  <div class="l-logo">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+    </svg>
+  </div>
+  <div class="l-title">מערכת סקרים עירוניים</div>
+  <div class="l-sub" id="login-subtitle">כניסה עם כתובת מייל וסיסמה</div>
+
+  <div class="l-card">
+
+    <!-- ── step 1: email + password ── -->
+    <form id="step-signin" autocomplete="on">
+      <label class="l-lbl" for="login-email">כתובת מייל</label>
+      <input class="l-inp-text" id="login-email" type="email" dir="ltr"
+             autocomplete="username" placeholder="name@example.com" required/>
+      <label class="l-lbl" for="login-password">סיסמה</label>
+      <div class="pw-field">
+        <input class="l-inp-text" id="login-password" type="password"
+               autocomplete="current-password" placeholder="הסיסמה שלך" required/>
+        <button type="button" class="pw-eye" data-target="login-password" aria-label="הצג סיסמה">👁️</button>
+      </div>
+      <div class="l-err" id="signin-error"></div>
+      <button class="l-btn" id="btn-signin" type="submit">כניסה למערכת ←</button>
+      <button class="l-link" id="link-forgot" type="button">שכחתי את הסיסמה</button>
+      <div class="l-hint">
+        אין הרשמה עצמית. חשבונות נפתחים על ידי מנהל המערכת בלבד.
+      </div>
+    </form>
+
+    <!-- ── step 2: forced first password change ── -->
+    <form id="step-first" class="hidden" autocomplete="on">
+      <div class="l-note">
+        זו הכניסה הראשונה שלך עם הסיסמה החד-פעמית.
+        בחר עכשיו סיסמה קבועה — היא תשמש אותך מכאן והלאה.
+      </div>
+      <div class="l-admin-head">
+        <span class="badge-admin">חשבון</span>
+        <span id="first-email-label" class="l-admin-mail"></span>
+      </div>
+      <label class="l-lbl" for="first-password">סיסמה חדשה</label>
+      <div class="pw-field">
+        <input class="l-inp-text" id="first-password" type="password"
+               autocomplete="new-password" placeholder="סיסמה חדשה" required/>
+        <button type="button" class="pw-eye" data-target="first-password" aria-label="הצג סיסמה">👁️</button>
+      </div>
+      <label class="l-lbl" for="first-password2">אימות סיסמה</label>
+      <input class="l-inp-text" id="first-password2" type="password"
+             autocomplete="new-password" placeholder="הקלד שוב" required/>
+      <div class="l-rules" id="first-rules"></div>
+      <div class="l-err" id="first-error"></div>
+      <button class="l-btn" id="btn-first" type="submit">שמור סיסמה והיכנס ←</button>
+      <button class="l-link" data-back="step-signin" type="button">חזרה</button>
+    </form>
+
+    <!-- ── step 3: forgot password ── -->
+    <form id="step-forgot" class="hidden">
+      <div class="l-note" id="forgot-note">
+        הכנס את כתובת המייל שלך ונשלח אליה קישור לבחירת סיסמה חדשה.
+      </div>
+      <label class="l-lbl" for="forgot-email">כתובת מייל</label>
+      <input class="l-inp-text" id="forgot-email" type="email" dir="ltr"
+             autocomplete="username" placeholder="name@example.com" required/>
+      <div class="l-err" id="forgot-error"></div>
+      <div class="l-ok hidden" id="forgot-ok"></div>
+      <button class="l-btn" id="btn-forgot" type="submit">שלח קישור לאיפוס ←</button>
+      <button class="l-link" data-back="step-signin" type="button">חזרה לכניסה</button>
+    </form>
+
+    <!-- ── step 4: reset from an emailed link ── -->
+    <form id="step-reset" class="hidden" autocomplete="on">
+      <div class="l-note">בחר סיסמה חדשה לחשבון שלך.</div>
+      <label class="l-lbl" for="reset-password">סיסמה חדשה</label>
+      <div class="pw-field">
+        <input class="l-inp-text" id="reset-password" type="password"
+               autocomplete="new-password" placeholder="סיסמה חדשה" required/>
+        <button type="button" class="pw-eye" data-target="reset-password" aria-label="הצג סיסמה">👁️</button>
+      </div>
+      <label class="l-lbl" for="reset-password2">אימות סיסמה</label>
+      <input class="l-inp-text" id="reset-password2" type="password"
+             autocomplete="new-password" placeholder="הקלד שוב" required/>
+      <div class="l-rules" id="reset-rules"></div>
+      <div class="l-err" id="reset-error"></div>
+      <div class="l-ok hidden" id="reset-ok"></div>
+      <button class="l-btn" id="btn-reset" type="submit">עדכן סיסמה ←</button>
+      <button class="l-link" data-back="step-signin" type="button">חזרה לכניסה</button>
+    </form>
+
+  </div>
+</div>
+
+<!-- ══════════════════ APP ══════════════════ -->
+<div class="app hidden" id="app">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="tb-title">סקרים עירוניים</span>
+    </div>
+    <div class="tb-right">
+      <span class="tb-city" id="tb-city">—</span>
+      <span class="tb-user" id="tb-user"></span>
+      <button class="tb-out" id="btn-logout">יציאה ✕</button>
+    </div>
+  </div>
+
+  <div class="nav" id="nav"></div>
+
+  <!-- ─────────── CITY PICKER ─────────── -->
+  <section id="panel-city" class="panel hidden">
+    <div class="es">
+      <div class="ec">
+        <h3>🏙️ בחר רשות מקומית</h3>
+        <p>הסקר החדש והרשומות שתערוך ישויכו לעיר שתבחר. אפשר להחליף עיר בכל רגע.</p>
+        <div id="city-grid" class="city-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── FORM ─────────── -->
+  <section id="panel-form" class="panel hidden">
+    <div class="s-row">
+      <input class="s-inp" id="search-biznum" type="text" inputmode="numeric"
+             placeholder="חיפוש לפי מספר ח.פ/ע.מ/ת.ז…" autocomplete="off"/>
+      <button class="btn btn-s btn-sm" id="btn-clear-search">✕</button>
+    </div>
+    <div id="status-bar" class="hidden"></div>
+
+    <div class="fb">
+      <div class="pw">
+        <span class="p-lbl" id="form-mode">סקר חדש</span>
+        <div class="p-bar"><div class="p-fill" id="progress-fill"></div></div>
+        <span class="p-pct" id="progress-pct">0%</span>
+      </div>
+
+      <div id="readonly-banner" class="ro-banner hidden">
+        🔒 הסקר מולא על ידי <b id="ro-owner"></b> — צפייה בלבד. רק היוצר או מנהל המערכת יכולים לערוך.
+      </div>
+
+      <!-- 1: business -->
+      <div class="card">
+        <div class="ch"><div class="cn">1</div><div class="ct">🏢 פרטי העסק</div></div>
+        <div class="cb">
+          <div class="f"><label class="lbl" for="f_bn"><span class="req">*</span>שם העסק</label>
+            <input class="inp" id="f_bn" placeholder="שם העסק" maxlength="160"/></div>
+          <div class="f"><label class="lbl" for="f_bid"><span class="req">*</span>מספר ח.פ / ע.מ / ת.ז</label>
+            <input class="inp" id="f_bid" inputmode="numeric" placeholder="מספר ייחודי" maxlength="40"/></div>
+          <div class="g2">
+            <div class="f"><label class="lbl" for="f_rn">שם הנציג</label><input class="inp" id="f_rn" placeholder="שם מלא" maxlength="100"/></div>
+            <div class="f"><label class="lbl" for="f_role">תפקיד</label><input class="inp" id="f_role" placeholder="תפקיד" maxlength="100"/></div>
+          </div>
+          <div class="g2">
+            <div class="f"><label class="lbl" for="f_rph">טלפון הנציג</label><input class="inp" id="f_rph" type="tel" inputmode="tel" placeholder="05x-xxxxxxx" maxlength="30"/></div>
+            <div class="f"><label class="lbl" for="f_bph">טלפון בעסק</label><input class="inp" id="f_bph" type="tel" inputmode="tel" placeholder="0x-xxxxxxx" maxlength="30"/></div>
+          </div>
+          <div class="f"><label class="lbl" for="f_addr"><span class="req">*</span>כתובת מלאה</label>
+            <input class="inp" id="f_addr" placeholder="רחוב, מספר בית" maxlength="200"/></div>
+          <div class="f"><label class="lbl" for="f_city">עיר</label><input class="inp" id="f_city" readonly/></div>
+        </div>
+      </div>
+
+      <!-- 2: characterisation -->
+      <div class="card">
+        <div class="ch"><div class="cn">2</div><div class="ct">🏷️ אפיון העסק</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl" for="f_bt">מהות העסק</label>
+            <select class="sel" id="f_bt"><option value="">-- בחר --</option></select>
+            <div id="bt-other" class="hidden slide mt8">
+              <input class="inp" id="f_bto" placeholder="פרט מהות העסק…" maxlength="100"/>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">מרכיב התאמה לעסק</label>
+            <div class="rr" data-opt="sector">
+              <div class="rb" data-val="מסחר">🛒 מסחר</div>
+              <div class="rb" data-val="תעשייה">🏭 תעשייה</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">מטבח פעיל</label>
+            <div class="rr" data-opt="kitchen">
+              <div class="rb" data-val="yes">✅ כן</div>
+              <div class="rb" data-val="no">❌ לא</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">חצר בעסק</label>
+            <div class="rr" data-opt="yard">
+              <div class="rb" data-val="yes">✅ כן</div>
+              <div class="rb" data-val="no">❌ לא</div>
+            </div>
+          </div>
+          <div class="f hidden" id="yard-size-field">
+            <label class="lbl" for="f_ysz">גודל החצר (מ״ר — הצהרת הנציג)</label>
+            <input class="inp" id="f_ysz" inputmode="numeric" placeholder="מ״ר" maxlength="20"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3: containers -->
+      <div class="card">
+        <div class="ch"><div class="cn">3</div><div class="ct">🗑️ כלי אצירה</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">סוגי כלי אצירה (בחר הכל הרלוונטי)</label>
+            <div class="ck-grid" id="container-types"></div>
+          </div>
+          <div id="container-config"></div>
+        </div>
+      </div>
+
+      <!-- 4: collection -->
+      <div class="card">
+        <div class="ch"><div class="cn">4</div><div class="ct">🚛 גורם מפנה</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">פסולת מעורבת רטובה</label>
+            <div class="rr" data-opt="wet">
+              <div class="rb" data-val="רשות">🏛️ רשות</div>
+              <div class="rb" data-val="עצמי">🔧 עצמי</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">פסולת קרטון</label>
+            <div class="rr wrap" data-opt="cardboard">
+              <div class="rb" data-val="רשות">🏛️ רשות</div>
+              <div class="rb" data-val="עצמי">🔧 עצמי</div>
+              <div class="rb" data-val="לא מפנה">⛔ לא מפנה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5: declaration -->
+      <div class="card">
+        <div class="ch"><div class="cn">5</div><div class="ct">📄 הצהרת עובדים</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">נמסרה הצהרה</label>
+            <div class="rr" data-opt="decl_given">
+              <div class="rb" data-val="yes">✅ כן</div>
+              <div class="rb" data-val="no">❌ לא</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">הוחזרה הצהרה</label>
+            <div class="rr" data-opt="decl_ret">
+              <div class="rb" data-val="yes">✅ כן</div>
+              <div class="rb" data-val="no">❌ לא</div>
+            </div>
+          </div>
+          <div class="f hidden" id="emp-field">
+            <label class="lbl" for="f_emp">מספר עובדים</label>
+            <input class="inp" id="f_emp" inputmode="numeric" placeholder="מספר עובדים" maxlength="10"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6: notes -->
+      <div class="card">
+        <div class="ch"><div class="cn">6</div><div class="ct">📝 הערות כלליות</div></div>
+        <div class="cb">
+          <div class="f"><textarea class="txa" id="f_notes" placeholder="הערות, תצפיות, מידע נוסף…" maxlength="4000"></textarea></div>
+        </div>
+      </div>
+
+      <!-- 7: media -->
+      <div class="card">
+        <div class="ch"><div class="cn">7</div><div class="ct">📸 מדיה וחתימה</div></div>
+        <div class="cb">
+          <div class="media-actions">
+            <button class="btn btn-cam" id="btn-camera">📷 צלם עכשיו</button>
+            <button class="btn btn-s" id="btn-pick-image">🖼️ בחר מהגלריה</button>
+          </div>
+          <input type="file" id="input-image" multiple accept="image/*" class="hidden"/>
+          <div class="thumbs" id="image-list"></div>
+
+          <div class="uz mt12" id="uz-doc">
+            <input type="file" id="input-doc" multiple class="hidden"
+                   accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"/>
+            <div class="uz-i">📎</div>
+            <div class="uz-t">העלה קבצים</div>
+            <div class="uz-s">PDF, Word, Excel, TXT, CSV — עד 15MB</div>
+          </div>
+          <div class="fl" id="doc-list"></div>
+
+          <div class="sig-wrap">
+            <div class="sig-head">
+              <span>חתימת בעל / נציג העסק</span>
+              <span class="sig-lock hidden" id="sig-lock">🔒 נעולה</span>
+            </div>
+            <div id="sig-saved" class="hidden">
+              <img id="sig-image" alt="חתימה שמורה" class="sig-img"/>
+              <div class="sig-note">החתימה נשמרה ולא ניתנת לעריכה.
+                <span id="sig-admin-reset-wrap" class="hidden">
+                  <button class="btn-link-danger" id="btn-sig-reset">איפוס (מנהל)</button>
+                </span>
+              </div>
+            </div>
+            <div id="sig-draw">
+              <div class="sw"><canvas id="sig-canvas" width="900" height="170"></canvas></div>
+              <div class="s-btns">
+                <button class="btn btn-s btn-sm" id="btn-sig-clear">🗑️ מחק</button>
+                <button class="btn btn-sm btn-g" id="btn-sig-save">💾 שמור חתימה</button>
+              </div>
+              <div class="s-ok hidden" id="sig-ok">✅ החתימה נשמרה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ff" id="form-footer">
+      <button class="btn btn-s btn-sm" id="btn-form-reset">ניקוי</button>
+      <button class="btn btn-p" id="btn-save">💾 שמור סקר</button>
+    </div>
+  </section>
+
+  <!-- ─────────── RECORDS ─────────── -->
+  <section id="panel-records" class="panel hidden">
+    <div class="s-row">
+      <input class="s-inp" id="records-search" type="text" placeholder="חיפוש שם עסק / ח.פ / כתובת…" autocomplete="off"/>
+      <select class="s-sel" id="records-city"><option value="">כל הערים</option></select>
+    </div>
+    <div class="filters">
+      <label class="chk"><input type="checkbox" id="records-mine"/> רק הסקרים שלי</label>
+      <span class="rec-count" id="records-count"></span>
+    </div>
+    <div class="es" id="records-body"></div>
+    <div class="pager" id="records-pager"></div>
+  </section>
+
+  <!-- ─────────── ADMIN: USERS ─────────── -->
+  <section id="panel-users" class="panel hidden">
+    <div class="es">
+      <div class="ec">
+        <h3>➕ הוספת משתמש</h3>
+        <p>פתיחת חשבון כאן היא הדרך היחידה לקבל גישה. אין הרשמה עצמית. המערכת תנפיק סיסמה חד-פעמית שתמסור למשתמש.</p>
+        <div class="g2">
+          <div class="f"><label class="lbl" for="nu-email">כתובת מייל</label>
+            <input class="inp" id="nu-email" type="email" placeholder="name@example.com" dir="ltr"/></div>
+          <div class="f"><label class="lbl" for="nu-name">שם לתצוגה</label>
+            <input class="inp" id="nu-name" placeholder="שם העובד"/></div>
+        </div>
+        <div class="f">
+          <label class="lbl" for="nu-role">הרשאה</label>
+          <select class="sel" id="nu-role">
+            <option value="user">סוקר — ממלא סקרים</option>
+            <option value="admin">מנהל — גישה מלאה</option>
+          </select>
+        </div>
+        <button class="btn btn-p" id="btn-add-user">הוסף משתמש</button>
+        <div id="new-credentials" class="cred-box hidden">
+          <div class="cred-title">✅ המשתמש נוצר — מסור לו את הפרטים האלה</div>
+          <div class="cred-row"><span class="cred-key">כתובת מייל</span>
+            <code class="cred-val" id="cred-email"></code></div>
+          <div class="cred-row"><span class="cred-key">סיסמה חד-פעמית</span>
+            <code class="cred-val cred-pw" id="cred-password"></code></div>
+          <button class="btn btn-s btn-sm" id="btn-copy-cred">📋 העתק פרטי כניסה</button>
+          <div class="cred-note">
+            הסיסמה מוצגת פעם אחת בלבד ולא ניתן לשחזר אותה.
+            המשתמש יתבקש לבחור סיסמה קבועה בכניסה הראשונה.
+            אם הוגדר SMTP, הפרטים נשלחו גם למייל שלו.
+          </div>
+        </div>
+      </div>
+      <div class="cb2">
+        <div class="ch2">👥 משתמשי המערכת</div>
+        <div id="users-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── ADMIN: CITIES ─────────── -->
+  <section id="panel-cities" class="panel hidden">
+    <div class="es">
+      <div class="ec">
+        <h3>🏙️ הוספת רשות מקומית</h3>
+        <p>הערים כאן הן הרשימה שממנה הסוקרים בוחרים.</p>
+        <div class="row-inline">
+          <input class="inp" id="nc-name" placeholder="לדוגמה: תל אביב" maxlength="60"/>
+          <button class="btn btn-p btn-inline" id="btn-add-city">הוסף</button>
+        </div>
+      </div>
+      <div class="cb2">
+        <div class="ch2">🗺️ רשויות במערכת</div>
+        <div id="cities-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── ADMIN: EXPORT ─────────── -->
+  <section id="panel-export" class="panel hidden">
+    <div class="es">
+      <div class="ec">
+        <h3>🎯 בחירת רשות לייצוא</h3>
+        <select class="sel" id="export-city"><option value="">כל הערים</option></select>
+        <div class="chips" id="export-chips"></div>
+      </div>
+      <div class="ec">
+        <h3>🗂️ קובץ נתונים מלא</h3>
+        <p>כל שדות הסקר, גיליון נפרד לכל עיר, כולל תמונות וחתימות מוטמעות בקובץ.</p>
+        <label class="chk"><input type="checkbox" id="export-images" checked/> הטמע תמונות וחתימות (קובץ גדול יותר)</label>
+        <button class="btn btn-ex" id="btn-export-full">⬇️ ייצא — קובץ נתונים מלא</button>
+      </div>
+      <div class="ec">
+        <h3>📐 קובץ לתחשיב</h3>
+        <p>עמודות A–V עם שורת פירוט לכל כלי אצירה, שורת סיכום לכל עסק ונוסחאות חיות.</p>
+        <button class="btn btn-ex" id="btn-export-calc">⬇️ ייצא — קובץ לתחשיב</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── ADMIN: SETTINGS ─────────── -->
+  <section id="panel-settings" class="panel hidden">
+    <div class="es">
+      <div class="ec">
+        <h3>📧 דוח יומי במייל</h3>
+        <p>שליחה אוטומטית של שני קבצי האקסל לכתובת שתבחר.</p>
+        <label class="chk big"><input type="checkbox" id="set-enabled"/> הפעל שליחה יומית</label>
+        <div class="g2 mt12">
+          <div class="f"><label class="lbl" for="set-time">שעת שליחה (שעון ישראל)</label>
+            <input class="inp" id="set-time" type="time" value="08:00"/></div>
+          <div class="f"><label class="lbl" for="set-scope">היקף הדוח</label>
+            <select class="sel" id="set-scope">
+              <option value="all">כל הנתונים במערכת</option>
+              <option value="last24h">רק סקרים מ-24 השעות האחרונות</option>
+            </select></div>
+        </div>
+        <div class="f"><label class="lbl" for="set-recipient">נמען</label>
+          <input class="inp" id="set-recipient" type="email" dir="ltr"/></div>
+        <div id="smtp-warn" class="l-note warn hidden">
+          ⚠️ SMTP אינו מוגדר. הוסף SMTP_USER ו-SMTP_PASSWORD לקובץ ‎.env‎ והפעל מחדש כדי לאפשר שליחה.
+        </div>
+        <div class="set-status" id="set-status"></div>
+        <div class="row-inline mt12">
+          <button class="btn btn-p" id="btn-save-settings">שמור הגדרות</button>
+          <button class="btn btn-s" id="btn-send-now">שלח עכשיו לבדיקה</button>
+        </div>
+      </div>
+
+      <div class="cb2">
+        <div class="ch2">🧾 יומן פעילות אחרון</div>
+        <div id="audit-body"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ─────────── ACCOUNT (all roles) ─────────── -->
+  <section id="panel-account" class="panel hidden">
+    <div class="es">
+      <div class="ec">
+        <h3>🔑 שינוי הסיסמה שלי</h3>
+        <p id="account-identity"></p>
+        <div class="f"><label class="lbl" for="pw-current">סיסמה נוכחית</label>
+          <input class="inp" id="pw-current" type="password" autocomplete="current-password"/></div>
+        <div class="f"><label class="lbl" for="pw-new">סיסמה חדשה</label>
+          <input class="inp" id="pw-new" type="password" autocomplete="new-password"/></div>
+        <div class="f"><label class="lbl" for="pw-new2">אימות סיסמה חדשה</label>
+          <input class="inp" id="pw-new2" type="password" autocomplete="new-password"/></div>
+        <div class="l-rules" id="account-rules"></div>
+        <button class="btn btn-p mt12" id="btn-change-pw">עדכן סיסמה</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── ADMIN: DASHBOARD ─────────── -->
+  <section id="panel-dashboard" class="panel hidden">
+    <div class="es">
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="cb2">
+        <div class="ch2">🏙️ סקרים לפי רשות</div>
+        <div id="stat-cities"></div>
+      </div>
+      <div class="cb2">
+        <div class="ch2">👤 סקרים לפי סוקר</div>
+        <div id="stat-users"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════════ OVERLAYS ══════════════════ -->
+<div id="camera-modal" class="modal hidden">
+  <div class="modal-box camera-box">
+    <video id="camera-video" playsinline autoplay muted></video>
+    <canvas id="camera-canvas" class="hidden"></canvas>
+    <div class="camera-bar">
+      <button class="btn btn-s" id="camera-close">ביטול</button>
+      <button class="shutter" id="camera-shoot" aria-label="צלם"></button>
+      <button class="btn btn-s" id="camera-flip">🔄</button>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox" class="modal hidden">
+  <button class="lb-close" id="lightbox-close">✕</button>
+  <img id="lightbox-img" alt="תצוגה מוגדלת"/>
+</div>
+
+<div id="confirm-modal" class="modal hidden">
+  <div class="modal-box confirm-box">
+    <div class="confirm-title" id="confirm-title">אישור</div>
+    <div class="confirm-text" id="confirm-text"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-s" id="confirm-no">ביטול</button>
+      <button class="btn btn-d" id="confirm-yes">אישור</button>
+    </div>
+  </div>
+</div>
+
+<div id="busy" class="busy hidden"><div class="spinner"></div><div id="busy-text">מעבד…</div></div>
+<div id="toast" class="toast"></div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/form.js"></script>
+<script src="/static/js/records.js"></script>
+<script src="/static/js/admin.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

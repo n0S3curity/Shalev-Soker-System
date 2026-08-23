@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#173404"/>
+<title>סקרים עירוניים</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#173404;--g2:#27500A;--g3:#3B6D11;--g4:#639922;--g5:#97C459;--g6:#C0DD97;--g7:#EAF3DE;--g8:#F4FAF0;
+  --r1:#A32D2D;--r2:#E24B4A;--r3:#FCEBEB;
+  --y1:#7A5800;--y2:#FFF8E1;
+  --s0:#F2F4F0;--s1:#EAECE7;--s2:#ffffff;
+  --tp:#1a1e17;--ts:#525A4A;--tm:#8A9283;
+  --bd:rgba(0,0,0,0.09);--bs:rgba(0,0,0,0.16);
+  --rad:9px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--s0);color:var(--tp);direction:rtl;font-size:15px;-webkit-text-size-adjust:100%;min-height:100dvh}
+.app{max-width:540px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
+
+/* LOGIN */
+#ls{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background:var(--g1)}
+.l-logo{width:64px;height:64px;background:var(--g4);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.l-title{color:#fff;font-size:22px;font-weight:600;margin-bottom:6px;text-align:center}
+.l-sub{color:var(--g6);font-size:14px;margin-bottom:32px;text-align:center}
+.l-card{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:340px}
+.l-lbl{font-size:13px;font-weight:500;color:var(--ts);margin-bottom:6px;display:block}
+.l-inp{width:100%;height:50px;border:1.5px solid var(--bs);border-radius:var(--rad);padding:0 14px;font-size:18px;text-align:center;letter-spacing:3px;direction:ltr;-webkit-appearance:none}
+.l-inp:focus{outline:none;border-color:var(--g4);box-shadow:0 0 0 3px rgba(99,153,34,.15)}
+.l-err{color:var(--r2);font-size:13px;margin-top:8px;text-align:center;min-height:18px}
+.l-btn{margin-top:16px;width:100%;height:50px;background:var(--g3);color:#fff;border:none;border-radius:var(--rad);font-size:16px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.l-btn:active{background:var(--g2)}
+
+/* TOPBAR */
+.topbar{background:var(--g1);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-icon{width:32px;height:32px;background:var(--g4);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.tb-title{color:#fff;font-size:16px;font-weight:500}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-city{color:var(--g6);font-size:12px;background:rgba(255,255,255,.12);padding:3px 9px;border-radius:20px}
+.tb-out{color:var(--g6);font-size:12px;cursor:pointer;padding:3px 6px;-webkit-tap-highlight-color:transparent}
+
+/* NAV */
+.nav{display:flex;background:var(--g2);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav::-webkit-scrollbar{display:none}
+.nav-t{flex:1;min-width:72px;padding:11px 6px;font-size:12px;color:var(--g6);cursor:pointer;border-bottom:2px solid transparent;text-align:center;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.nav-t.act{color:#fff;border-bottom-color:var(--g5);background:rgba(255,255,255,.08)}
+
+/* PANELS */
+.panel{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(90px,env(safe-area-inset-bottom,90px))}
+
+/* SEARCH */
+.s-row{padding:11px 14px;background:var(--s2);border-bottom:1px solid var(--bd);display:flex;gap:8px;position:sticky;top:0;z-index:10}
+.s-inp{flex:1;height:42px;border:1px solid var(--bs);border-radius:var(--rad);padding:0 12px;font-size:16px;background:var(--s2);color:var(--tp);direction:rtl;-webkit-appearance:none}
+.s-inp:focus{outline:none;border-color:var(--g4);box-shadow:0 0 0 3px rgba(99,153,34,.15)}
+
+/* BUTTONS */
+.btn{height:44px;padding:0 14px;border-radius:var(--rad);font-size:14px;font-weight:500;cursor:pointer;border:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;user-select:none;transition:opacity .15s}
+.btn:active{opacity:.72}
+.btn-p{background:var(--g3);color:#fff;width:100%}
+.btn-s{background:var(--s2);color:var(--tp);border:1px solid var(--bs)}
+.btn-sm{height:36px;padding:0 12px;font-size:13px}
+.btn-d{background:var(--r2);color:#fff}
+.btn-ex{background:var(--g7);color:var(--g1);border:1px solid var(--g5);width:100%;height:50px;font-size:15px;font-weight:600}
+
+/* STATUS */
+.st-bar{padding:9px 14px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
+.st-found{background:var(--g7);color:var(--g2)}
+.st-new{background:var(--y2);color:var(--y1)}
+
+/* FORM */
+.fb{padding:12px 14px}
+.pw{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.p-lbl{font-size:12px;color:var(--tm);white-space:nowrap}
+.p-bar{flex:1;height:5px;background:var(--bs);border-radius:3px}
+.p-fill{height:100%;background:var(--g4);border-radius:3px;transition:width .4s}
+.p-pct{font-size:12px;color:var(--g3);font-weight:500;min-width:30px;text-align:left}
+
+/* CARDS */
+.card{background:var(--s2);border:1px solid var(--bd);border-radius:14px;margin-bottom:12px;overflow:hidden}
+.ch{padding:11px 14px;background:var(--g7);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:9px}
+.cn{width:22px;height:22px;background:var(--g3);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ct{font-size:14px;font-weight:600;color:var(--g1)}
+.cb{padding:14px}
+
+/* FIELDS */
+.f{margin-bottom:12px}
+.f:last-child{margin-bottom:0}
+.lbl{font-size:12px;color:var(--ts);margin-bottom:5px;font-weight:500;display:block}
+.req{color:var(--r2);margin-right:2px}
+.inp,.sel,.txa{width:100%;border:1px solid var(--bs);border-radius:var(--rad);padding:10px 12px;font-size:15px;background:var(--s2);color:var(--tp);direction:rtl;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+.inp:focus,.sel:focus,.txa:focus{outline:none;border-color:var(--g4);box-shadow:0 0 0 3px rgba(99,153,34,.15)}
+.inp[readonly]{background:var(--s1);color:var(--tm);cursor:default}
+.txa{min-height:80px;resize:vertical;line-height:1.5}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.hidden{display:none!important}
+.slide{animation:sd .2s ease}
+@keyframes sd{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* RADIO/YES-NO */
+.rr{display:flex;gap:8px}
+.rb{flex:1;height:46px;border:1px solid var(--bs);border-radius:var(--rad);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:500;background:var(--s2);color:var(--tp);-webkit-tap-highlight-color:transparent;user-select:none;transition:all .15s}
+.rb:active{opacity:.7}
+.rb.on{background:var(--g7);border-color:var(--g4);color:var(--g2)}
+.rb.off{background:var(--r3);border-color:var(--r2);color:var(--r1)}
+
+/* CHECKBOXES */
+.ck-grid{display:flex;flex-wrap:wrap;gap:8px}
+.ck{padding:8px 14px;border:1px solid var(--bs);border-radius:20px;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;background:var(--s2);transition:all .15s}
+.ck.sel{background:var(--g7);border-color:var(--g4);color:var(--g2);font-weight:500}
+.ck:active{opacity:.7}
+
+/* CONTAINER BLOCKS — new multi-vol architecture */
+.cblk{border:1px solid var(--bd);border-radius:12px;margin-top:10px;overflow:hidden;background:var(--g8)}
+.cblk-head{padding:10px 14px;background:var(--g7);border-bottom:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--g1);display:flex;align-items:center;gap:7px}
+.cblk-body{padding:12px}
+.vol-sel-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.vbtn{padding:7px 14px;border:1px solid var(--bs);border-radius:20px;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;background:var(--s2);transition:all .15s}
+.vbtn.sel{background:var(--g4);color:#fff;border-color:var(--g4)}
+.vbtn:active{opacity:.7}
+
+/* VOL CONFIG ROW — each selected volume gets its own row */
+.vcfg{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;margin-bottom:8px}
+.vcfg:last-child{margin-bottom:0}
+.vcfg-title{font-size:12px;font-weight:600;color:var(--g2);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+.vcfg-remove{font-size:18px;color:var(--r2);cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent}
+
+/* QTY GRID */
+.qty-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:6px}
+.qb{height:38px;border:1px solid var(--bs);border-radius:var(--rad);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:500;background:var(--s2);-webkit-tap-highlight-color:transparent;user-select:none;transition:all .15s}
+.qb.sel{background:var(--g3);color:#fff;border-color:var(--g3)}
+.qb:active{opacity:.7}
+
+/* PER-CONTAINER CONFIG (freq / ownership / usage) */
+.cfg-sec{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.cfg-sec .lbl{color:var(--g2)}
+
+/* DIVIDER */
+.div{height:1px;background:var(--bd);margin:12px 0}
+
+/* UPLOADS */
+.uz{border:2px dashed var(--bs);border-radius:10px;padding:18px 12px;text-align:center;cursor:pointer;background:var(--s1);-webkit-tap-highlight-color:transparent;transition:background .15s}
+.uz:active{background:var(--g7);border-color:var(--g4)}
+.fl{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.fi{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s1);border-radius:var(--rad);border:1px solid var(--bd)}
+.fn{flex:1;font-size:12px;color:var(--ts);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
+.fdl{color:var(--r2);cursor:pointer;font-size:20px;line-height:1;-webkit-tap-highlight-color:transparent}
+
+/* SIGNATURE */
+.sw{border:1px solid var(--bs);border-radius:10px;overflow:hidden;background:#fff;touch-action:none}
+canvas#sc{display:block;width:100%;height:150px;touch-action:none;cursor:crosshair}
+.s-btns{display:flex;gap:8px;margin-top:8px}
+.s-ok{display:none;align-items:center;gap:5px;font-size:12px;color:var(--g2);margin-top:5px}
+.s-prev img{max-height:56px;border:1px solid var(--bd);border-radius:6px;margin-top:6px}
+
+/* FOOTER */
+.ff{padding:12px 14px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:var(--s2);border-top:1px solid var(--bd);display:flex;gap:8px;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:540px;z-index:20}
+
+/* RECORDS / EXPORT */
+.es{padding:14px}
+.ec{background:var(--s2);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:12px}
+.ec h3{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--tp);display:flex;align-items:center;gap:8px}
+.ec p{font-size:13px;color:var(--ts);margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{padding:4px 12px;background:var(--g7);border:1px solid var(--g5);border-radius:20px;font-size:12px;color:var(--g2)}
+.cb2{background:var(--s2);border:1px solid var(--bd);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.ch2{padding:10px 14px;background:var(--g7);border-bottom:1px solid var(--bd);font-size:13px;font-weight:600;color:var(--g1)}
+.rr2{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.rr2:last-child{border-bottom:none}
+.rm{flex:1;min-width:0}
+.rb2{font-size:14px;font-weight:500}
+.rd{font-size:12px;color:var(--ts);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ra{display:flex;gap:6px;flex-shrink:0}
+.empty{text-align:center;padding:40px 16px;color:var(--tm)}
+.empty-i{font-size:44px;margin-bottom:10px}
+
+/* TOAST */
+.toast{position:fixed;bottom:max(80px,env(safe-area-inset-bottom,80px));left:50%;transform:translateX(-50%);padding:11px 20px;border-radius:var(--rad);font-size:14px;font-weight:500;text-align:center;display:none;z-index:999;white-space:nowrap;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.t-ok{background:var(--g2);color:#fff}
+.t-err{background:var(--r2);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="ls">
+  <div class="l-logo">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+    </svg>
+  </div>
+  <div class="l-title">מערכת סקרים עירוניים</div>
+  <div class="l-sub">הכנס מספר משתמש לכניסה</div>
+  <div class="l-card">
+    <label class="l-lbl" for="uid">מספר משתמש</label>
+    <input class="l-inp" id="uid" type="text" inputmode="numeric" placeholder="_ _ _ _ _" maxlength="10"/>
+    <div class="l-err" id="lerr"></div>
+    <button class="l-btn" onclick="doLogin()">כניסה למערכת ←</button>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="app" id="app" style="display:none">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="tb-title">סקרים עירוניים</span>
+    </div>
+    <div class="tb-right">
+      <span class="tb-city" id="tc">—</span>
+      <span class="tb-out" onclick="doLogout()">יציאה ✕</span>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-t act" id="t-form"    onclick="go('form')">📋 סקר</div>
+    <div class="nav-t"    id="t-records" onclick="go('records')">🗂️ רשומות</div>
+    <div class="nav-t"    id="t-export"  onclick="go('export')">📊 ייצוא</div>
+  </div>
+
+  <!-- ── FORM ── -->
+  <div id="p-form" class="panel">
+    <div class="s-row">
+      <input class="s-inp" id="sb" type="text" inputmode="numeric"
+        placeholder="חיפוש לפי מספר ח.פ/ע.מ/ת.ז..." oninput="doSearch(this.value)"/>
+      <button class="btn btn-s btn-sm" onclick="resetForm()">✕</button>
+    </div>
+    <div id="stbar" style="display:none"></div>
+
+    <div class="fb">
+      <div class="pw">
+        <span class="p-lbl" id="fmode">סקר חדש</span>
+        <div class="p-bar"><div class="p-fill" id="pf" style="width:0%"></div></div>
+        <span class="p-pct" id="pp">0%</span>
+      </div>
+
+      <!-- CARD 1: פרטי העסק -->
+      <div class="card">
+        <div class="ch"><div class="cn">1</div><div class="ct">🏢 פרטי העסק</div></div>
+        <div class="cb">
+          <div class="f"><label class="lbl"><span class="req">*</span>שם העסק</label><input class="inp" id="f_bn" placeholder="שם העסק" oninput="prog()"/></div>
+          <div class="f"><label class="lbl"><span class="req">*</span>מספר ח.פ / ע.מ / ת.ז</label><input class="inp" id="f_bid" inputmode="numeric" placeholder="מספר ייחודי" oninput="prog()"/></div>
+          <div class="g2">
+            <div class="f"><label class="lbl">שם הנציג</label><input class="inp" id="f_rn" placeholder="שם מלא"/></div>
+            <div class="f"><label class="lbl">תפקיד</label><input class="inp" id="f_role" placeholder="תפקיד"/></div>
+          </div>
+          <div class="g2">
+            <div class="f"><label class="lbl">טלפון הנציג</label><input class="inp" id="f_rph" type="tel" inputmode="tel" placeholder="05x-xxxxxxx"/></div>
+            <div class="f"><label class="lbl">טלפון בעסק</label><input class="inp" id="f_bph" type="tel" inputmode="tel" placeholder="0x-xxxxxxx"/></div>
+          </div>
+          <div class="f"><label class="lbl"><span class="req">*</span>כתובת מלאה</label><input class="inp" id="f_addr" placeholder="רחוב, מספר בית, עיר" oninput="prog()"/></div>
+          <div class="f"><label class="lbl">עיר</label><input class="inp" id="f_city" readonly/></div>
+        </div>
+      </div>
+
+      <!-- CARD 2: אפיון העסק -->
+      <div class="card">
+        <div class="ch"><div class="cn">2</div><div class="ct">🏷️ אפיון העסק</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">מהות העסק</label>
+            <select class="sel" id="f_bt" onchange="btChg(this.value)">
+              <option value="">-- בחר --</option>
+              <option>מסעדה</option><option>מכולת</option><option>גלידריה</option><option>פיצוצייה</option>
+              <option>ירקן</option><option>חנות פרחים</option><option>מספרה</option><option>בית מרקחת</option>
+              <option>בית קפה</option><option>חנות בגדים</option><option>חנות נעליים</option><option>סופרמרקט</option>
+              <option>פיצרייה</option><option>שווארמה</option><option>פלאפל</option><option>אוכל מהיר</option>
+              <option>מאפייה</option><option>בית מאפה</option><option>מוסך</option><option>פנצ'רייה</option>
+              <option>קניון</option><option>משרד</option><option>בניין משרדים</option><option>חנות צעצועים</option>
+              <option>כלי בית</option><option>טמבוריה</option><option>חומרי בניין</option><option>חנות רהיטים</option>
+              <option>אולם תצוגת רכבים</option><option>חנות אלקטרוניקה</option><option>חנות טלפונים</option>
+              <option>תחנת דלק</option><option>מכבסה</option><option>חנות צילום</option><option>אטליז</option>
+              <option>מעדניה</option><option>חנות טבע</option><option>תבלינים ופיצוחים</option>
+              <option>מכירת אלכוהול</option><option>תשמישי קדושה</option><option>חנות תכשיטים</option>
+              <option>תיווך</option><option>חנות תאורה</option><option>בית מלון</option><option>בית גדרה</option>
+              <option>בית אבות</option><option>בית חולים</option><option>אופטיקה</option>
+              <option>חנות אופניים</option><option>מרלו"ג</option><option>אביזרי רכב</option><option value="אחר">אחר</option>
+            </select>
+            <div id="bt-other" class="hidden slide" style="margin-top:8px">
+              <input class="inp" id="f_bto" placeholder="פרט מהות העסק..."/>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">מרכיב התאמה לעסק</label>
+            <div class="rr">
+              <div class="rb" id="sec-m" onclick="setOpt('sector','מסחר')">🛒 מסחר</div>
+              <div class="rb" id="sec-t" onclick="setOpt('sector','תעשייה')">🏭 תעשייה</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">מטבח פעיל</label>
+            <div class="rr">
+              <div class="rb" id="kit-y" onclick="setOpt('kitchen','yes')">✅ כן</div>
+              <div class="rb" id="kit-n" onclick="setOpt('kitchen','no')">❌ לא</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">חצר בעסק</label>
+            <div class="rr">
+              <div class="rb" id="yrd-y" onclick="setOpt('yard','yes')">✅ כן</div>
+              <div class="rb" id="yrd-n" onclick="setOpt('yard','no')">❌ לא</div>
+            </div>
+          </div>
+          <div class="f hidden" id="yard-sf">
+            <label class="lbl">גודל החצר (מ״ר — הצהרת הנציג)</label>
+            <input class="inp" id="f_ysz" inputmode="numeric" placeholder="מ״ר"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: כלי אצירה — full dynamic multi-vol -->
+      <div class="card">
+        <div class="ch"><div class="cn">3</div><div class="ct">🗑️ כלי אצירה</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">סוגי כלי אצירה (בחר הכל הרלוונטי)</label>
+            <div class="ck-grid" id="ck-types">
+              <div class="ck" data-c="עגלה"      onclick="toggleCType('עגלה')">עגלה</div>
+              <div class="ck" data-c="דחסן"      onclick="toggleCType('דחסן')">דחסן</div>
+              <div class="ck" data-c="מכולה"     onclick="toggleCType('מכולה')">מכולה</div>
+              <div class="ck" data-c="טמון קרקע" onclick="toggleCType('טמון קרקע')">טמון קרקע</div>
+              <div class="ck" data-c="מונח קרקע" onclick="toggleCType('מונח קרקע')">מונח קרקע</div>
+            </div>
+          </div>
+          <div id="csubs"></div>
+        </div>
+      </div>
+
+      <!-- CARD 4: גורם מפנה -->
+      <div class="card">
+        <div class="ch"><div class="cn">4</div><div class="ct">🚛 גורם מפנה</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">פסולת מעורבת רטובה</label>
+            <div class="rr">
+              <div class="rb" id="wet-r" onclick="setOpt('wet','רשות')">🏛️ רשות</div>
+              <div class="rb" id="wet-s" onclick="setOpt('wet','עצמי')">🔧 עצמי</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">פסולת קרטון</label>
+            <div class="rr" style="flex-wrap:wrap">
+              <div class="rb" id="crd-r" onclick="setOpt('cardboard','רשות')" style="min-width:80px">🏛️ רשות</div>
+              <div class="rb" id="crd-s" onclick="setOpt('cardboard','עצמי')" style="min-width:80px">🔧 עצמי</div>
+              <div class="rb" id="crd-n" onclick="setOpt('cardboard','לא מפנה')" style="min-width:80px">⛔ לא מפנה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: הצהרת עובדים -->
+      <div class="card">
+        <div class="ch"><div class="cn">5</div><div class="ct">📄 הצהרת עובדים</div></div>
+        <div class="cb">
+          <div class="f">
+            <label class="lbl">נמסרה הצהרה</label>
+            <div class="rr">
+              <div class="rb" id="dg-y" onclick="setOpt('decl_given','yes')">✅ כן</div>
+              <div class="rb" id="dg-n" onclick="setOpt('decl_given','no')">❌ לא</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">הוחזרה הצהרה</label>
+            <div class="rr">
+              <div class="rb" id="dr-y" onclick="setOpt('decl_ret','yes')">✅ כן</div>
+              <div class="rb" id="dr-n" onclick="setOpt('decl_ret','no')">❌ לא</div>
+            </div>
+          </div>
+          <div class="f hidden" id="emp-f">
+            <label class="lbl">מספר עובדים</label>
+            <input class="inp" id="f_emp" inputmode="numeric" placeholder="מספר עובדים"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: הערות -->
+      <div class="card">
+        <div class="ch"><div class="cn">6</div><div class="ct">📝 הערות כלליות</div></div>
+        <div class="cb">
+          <div class="f"><textarea class="txa" id="f_notes" placeholder="הערות, תצפיות, מידע נוסף..."></textarea></div>
+        </div>
+      </div>
+
+      <!-- CARD 7: מדיה וחתימה -->
+      <div class="card">
+        <div class="ch"><div class="cn">7</div><div class="ct">📸 מדיה וחתימה</div></div>
+        <div class="cb">
+          <div class="uz" onclick="document.getElementById('imgIn').click()">
+            <input type="file" id="imgIn" multiple accept="image/*" capture="environment"
+              style="display:none" onchange="addFiles(this,'img')"/>
+            <div style="font-size:26px;margin-bottom:5px">📷</div>
+            <div style="font-size:14px;color:var(--ts);font-weight:500">צלם או בחר תמונות</div>
+            <div style="font-size:11px;color:var(--tm);margin-top:3px">לחץ לפתיחת מצלמה / גלריה</div>
+          </div>
+          <div class="fl" id="img-list"></div>
+          <div class="uz" onclick="document.getElementById('fileIn').click()" style="margin-top:10px">
+            <input type="file" id="fileIn" multiple style="display:none" onchange="addFiles(this,'doc')"/>
+            <div style="font-size:26px;margin-bottom:5px">📎</div>
+            <div style="font-size:14px;color:var(--ts);font-weight:500">העלה קבצים</div>
+            <div style="font-size:11px;color:var(--tm);margin-top:3px">PDF, Word, Excel</div>
+          </div>
+          <div class="fl" id="doc-list"></div>
+          <div style="margin-top:14px">
+            <div style="font-size:12px;color:var(--tm);margin-bottom:8px">חתימת בעל / נציג העסק</div>
+            <div class="sw"><canvas id="sc" width="800" height="150"></canvas></div>
+            <div class="s-btns">
+              <button class="btn btn-s btn-sm" onclick="clearSig()">🗑️ מחק</button>
+              <button class="btn btn-sm" style="background:var(--g3);color:#fff" onclick="saveSig()">💾 שמור חתימה</button>
+            </div>
+            <div class="s-ok" id="sOk">✅ החתימה נשמרה</div>
+            <div class="s-prev" id="sPrev"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- fb -->
+    <div class="ff">
+      <button class="btn btn-s btn-sm" onclick="resetForm()" style="flex:0 0 auto">ניקוי</button>
+      <button class="btn btn-p" onclick="save()" id="svbtn">💾 שמור סקר</button>
+    </div>
+  </div><!-- p-form -->
+
+  <!-- ── RECORDS ── -->
+  <div id="p-records" class="panel" style="display:none">
+    <div class="es" id="rec-body"></div>
+  </div>
+
+  <!-- ── EXPORT ── -->
+  <div id="p-export" class="panel" style="display:none">
+    <div class="es">
+      <div class="ec">
+        <h3>🗂️ קובץ נתונים מלא</h3>
+        <p>כל שדות הסקר — גיליון נפרד לכל עיר.</p>
+        <div class="chips" id="chips-full"></div>
+        <button class="btn-ex btn" onclick="exportFull()">⬇️ ייצא — קובץ נתונים מלא</button>
+      </div>
+      <div class="ec">
+        <h3>📐 קובץ לתחשיב</h3>
+        <p>עמודות A–V עם שורת פירוט לכל כלי אצירה ושורת סיכום לעסק.</p>
+        <div class="chips" id="chips-calc"></div>
+        <button class="btn-ex btn" onclick="exportCalc()" style="background:var(--g7)">⬇️ ייצא — קובץ לתחשיב</button>
+      </div>
+    </div>
+  </div>
+</div><!-- app -->
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+//  STATE
+// ╚══════════════════════════════════════════════════════════╝
+const USER_MAP = { '11725':'רחובות', '28965':'גדרה' };
+
+let DB          = JSON.parse(localStorage.getItem('sv_db') || '[]');
+let curUser     = null;
+let curCity     = null;
+let editId      = null;
+let sigData     = null;
+let uploads     = { img:[], doc:[] };
+let opts        = {};  // sector, kitchen, yard, wet, cardboard, decl_given, decl_ret
+
+/*
+  containers — array of ConfigEntry objects:
+  {
+    ctype : 'דחסן',           // container type name
+    vol   : '8',              // volume string (null for no-vol types)
+    qty   : 3,                // 1–10
+    freq  : 'פעמיים בשבוע',  // collection frequency label
+    freqOther : '',           // free text if freq==='אחר'
+    ownership : 'רשות',
+    usage     : 'משותף'
+  }
+  Multiple entries can share the same ctype (e.g. דחסן 8 AND דחסן 10).
+*/
+let containers = [];
+
+// ╔══════════════════════════════════════════════════════════╗
+//  CONST
+// ╚══════════════════════════════════════════════════════════╝
+const CVOLS = {
+  'עגלה' : ['240','360','770','1100'],
+  'דחסן' : ['8','10','12','14','20','26'],
+  'מכולה': ['6','8','12']
+};
+const NO_VOL = new Set(['טמון קרקע','מונח קרקע']);
+const CORDER = ['עגלה','דחסן','מכולה','טמון קרקע','מונח קרקע'];
+
+const FREQ_OPTS = [
+  '6 פעמים בשבוע','5 פעמים בשבוע','4 פעמים בשבוע','3 פעמים בשבוע',
+  'פעמיים בשבוע','פעם בשבוע','פעם בשבועיים','פעם בחודש','אחר'
+];
+const FREQ_MAP = {
+  '6 פעמים בשבוע': 6*4.33,
+  '5 פעמים בשבוע': 5*4.33,
+  '4 פעמים בשבוע': 4*4.33,
+  '3 פעמים בשבוע': 3*4.33,
+  'פעמיים בשבוע':  2*4.33,
+  'פעם בשבוע':     1*4.33,
+  'פעם בשבועיים':  0.5*4.33,
+  'פעם בחודש':     1
+};
+
+// ╔══════════════════════════════════════════════════════════╗
+//  AUTH
+// ╚══════════════════════════════════════════════════════════╝
+function doLogin() {
+  const uid = document.getElementById('uid').value.trim();
+  if (!uid) { document.getElementById('lerr').textContent='הכנס מספר משתמש'; return; }
+  const city = USER_MAP[uid];
+  if (!city) { document.getElementById('lerr').textContent='מספר משתמש לא מוכר'; return; }
+  curUser = uid; curCity = city;
+  document.getElementById('ls').style.display  = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('f_city').value = city;
+  upRC();
+}
+document.getElementById('uid').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  curUser=null; curCity=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('ls').style.display='flex';
+  document.getElementById('uid').value='';
+  document.getElementById('lerr').textContent='';
+  resetForm();
+}
+
+function upRC() {
+  document.getElementById('tc').textContent = curCity + ' (' + DB.filter(r=>r.city===curCity).length + ')';
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  NAV / TOAST
+// ╚══════════════════════════════════════════════════════════╝
+function go(tab) {
+  ['form','records','export'].forEach(t => {
+    document.getElementById('p-'+t).style.display = t===tab?'':'none';
+    document.getElementById('t-'+t).classList.toggle('act', t===tab);
+  });
+  if(tab==='records') renderRecs();
+  if(tab==='export')  renderExp();
+}
+
+function toast(msg, type) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+(type==='ok'?'t-ok':'t-err');
+  el.style.display='block'; clearTimeout(el._t);
+  el._t=setTimeout(()=>el.style.display='none',2800);
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  SEARCH
+// ╚══════════════════════════════════════════════════════════╝
+function doSearch(v) {
+  const bar=document.getElementById('stbar');
+  if(!v||v.length<2){bar.style.display='none';return;}
+  const r=DB.find(x=>x.biznum===v.trim());
+  if(r){
+    bar.className='st-bar st-found'; bar.innerHTML='✅ עסק קיים — הנתונים נטענו לעריכה'; bar.style.display='flex';
+    fillForm(r); editId=r.id;
+    document.getElementById('fmode').textContent='עריכה';
+    document.getElementById('svbtn').textContent='💾 עדכן';
+  } else if(v.length>=3){
+    bar.className='st-bar st-new'; bar.innerHTML='🆕 עסק חדש'; bar.style.display='flex'; editId=null;
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  OPTION BUTTONS (simple radio pairs)
+// ╚══════════════════════════════════════════════════════════╝
+const OPT_MAP = {
+  sector:     { ids:['sec-m','sec-t'],        vals:['מסחר','תעשייה'] },
+  kitchen:    { ids:['kit-y','kit-n'],         vals:['yes','no'] },
+  yard:       { ids:['yrd-y','yrd-n'],         vals:['yes','no'] },
+  wet:        { ids:['wet-r','wet-s'],          vals:['רשות','עצמי'] },
+  cardboard:  { ids:['crd-r','crd-s','crd-n'], vals:['רשות','עצמי','לא מפנה'] },
+  decl_given: { ids:['dg-y','dg-n'],           vals:['yes','no'] },
+  decl_ret:   { ids:['dr-y','dr-n'],            vals:['yes','no'] }
+};
+
+function setOpt(key, val) {
+  opts[key]=val;
+  const m=OPT_MAP[key];
+  m.ids.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    const isActive = m.vals[i]===val;
+    const isNeg = val==='no'||val==='לא מפנה';
+    el.className='rb'+(isActive?(isNeg?' off':' on'):'');
+  });
+  if(key==='yard')     document.getElementById('yard-sf').classList.toggle('hidden', val!=='yes');
+  if(key==='decl_ret') document.getElementById('emp-f').classList.toggle('hidden',  val!=='yes');
+  prog();
+}
+
+function btChg(v){ document.getElementById('bt-other').classList.toggle('hidden',v!=='אחר'); }
+
+// ╔══════════════════════════════════════════════════════════╗
+//  CONTAINERS — multi-volume per type, per-entry config
+// ╚══════════════════════════════════════════════════════════╝
+
+// Returns unique entry key used as DOM id prefix
+function entryKey(e) {
+  return (e.ctype + '_' + (e.vol||'nv')).replace(/\s/g,'_');
+}
+
+function toggleCType(name) {
+  const ckEl = document.querySelector(`.ck[data-c="${name}"]`);
+  const typeExists = containers.some(e=>e.ctype===name);
+  if (typeExists) {
+    // Remove ALL entries of this type
+    containers = containers.filter(e=>e.ctype!==name);
+    ckEl.classList.remove('sel');
+  } else {
+    if (NO_VOL.has(name)) {
+      // No-vol types: one entry, no volume
+      containers.push({ ctype:name, vol:null, qty:null, freq:'', freqOther:'', ownership:'', usage:'' });
+    }
+    // Vol-having types: don't add entry yet — user selects volumes first
+    ckEl.classList.add('sel');
+  }
+  renderContainerSubs();
+}
+
+function toggleVolume(ctype, vol) {
+  const idx = containers.findIndex(e=>e.ctype===ctype && e.vol===vol);
+  if (idx >= 0) {
+    containers.splice(idx, 1);
+    // If no entries left for this type, un-check it
+    if (!containers.some(e=>e.ctype===ctype)) {
+      document.querySelector(`.ck[data-c="${ctype}"]`).classList.remove('sel');
+    }
+  } else {
+    containers.push({ ctype, vol, qty:null, freq:'', freqOther:'', ownership:'', usage:'' });
+  }
+  renderContainerSubs();
+}
+
+function setEntryField(ctype, vol, field, value) {
+  const e = containers.find(e=>e.ctype===ctype && e.vol==vol);
+  if (e) e[field] = value;
+  // Re-render only the qty grid or freq-other toggle without full rebuild
+  if (field==='qty' || field==='freq') renderContainerSubs();
+}
+
+function renderContainerSubs() {
+  const wrap = document.getElementById('csubs');
+  // Group entries by ctype, preserve CORDER
+  const byType = {};
+  CORDER.forEach(n=>{ byType[n]=[]; });
+  containers.forEach(e=>{ if(byType[e.ctype]) byType[e.ctype].push(e); });
+
+  let html = '';
+  CORDER.forEach(name=>{
+    const entries = byType[name];
+    if (entries.length===0 && !document.querySelector(`.ck[data-c="${name}"]`)?.classList.contains('sel')) return;
+    if (!document.querySelector(`.ck[data-c="${name}"]`)?.classList.contains('sel')) return;
+
+    const vols = CVOLS[name];
+    const isNoVol = NO_VOL.has(name);
+
+    html += `<div class="cblk">
+      <div class="cblk-head">🗑️ ${name}</div>
+      <div class="cblk-body">`;
+
+    // Volume selector row (multi-select)
+    if (!isNoVol && vols) {
+      const selVols = new Set(entries.map(e=>e.vol));
+      html += `<div style="margin-bottom:10px">
+        <div class="lbl" style="color:var(--g2)">בחר נפחים (ניתן לבחור מספר):</div>
+        <div class="vol-sel-row">`;
+      vols.forEach(v=>{
+        html += `<div class="vbtn${selVols.has(v)?' sel':''}"
+          onclick="toggleVolume('${name}','${v}')">${v} ל׳</div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // One config card per entry
+    entries.forEach(e=>{
+      const ek = entryKey(e);
+      const label = isNoVol ? name : `${name} ${e.vol} ל׳`;
+      const qtyBtns = Array.from({length:10},(_,i)=>i+1).map(n=>
+        `<div class="qb${e.qty===n?' sel':''}"
+          onclick="setEntryField('${name}','${e.vol||null}','qty',${n})">${n}</div>`
+      ).join('');
+
+      // Freq select options
+      const freqOpts = FREQ_OPTS.map(f=>
+        `<option value="${f}"${e.freq===f?' selected':''}>${f}</option>`
+      ).join('');
+
+      html += `<div class="vcfg" id="ecfg-${ek}">
+        <div class="vcfg-title">
+          <span>⚙️ ${label}</span>
+          ${!isNoVol?`<span class="vcfg-remove" onclick="toggleVolume('${name}','${e.vol}')">×</span>`:''}
+        </div>
+        <div class="lbl">כמות</div>
+        <div class="qty-grid">${qtyBtns}</div>
+        <div class="cfg-sec">
+          <div class="f">
+            <label class="lbl">תדירות פינוי</label>
+            <select class="sel" id="freq-${ek}"
+              onchange="onFreqChange('${name}','${e.vol||null}',this.value)">
+              <option value="">-- בחר --</option>${freqOpts}
+            </select>
+            <div id="freqot-${ek}" class="${e.freq==='אחר'?'':'hidden'} slide" style="margin-top:6px">
+              <input class="inp" id="freqotinp-${ek}"
+                placeholder="פרט תדירות..."
+                value="${e.freqOther||''}"
+                oninput="setEntryFieldDirect('${name}','${e.vol||null}','freqOther',this.value)"/>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">בעלות</label>
+            <div class="rr">
+              <div class="rb${e.ownership==='רשות'?' on':''}"
+                onclick="setEntryField('${name}','${e.vol||null}','ownership','רשות');renderContainerSubs()">🏛️ רשות</div>
+              <div class="rb${e.ownership==='פרטי'?' on':''}"
+                onclick="setEntryField('${name}','${e.vol||null}','ownership','פרטי');renderContainerSubs()">👤 פרטי</div>
+            </div>
+          </div>
+          <div class="f">
+            <label class="lbl">שימוש</label>
+            <div class="rr">
+              <div class="rb${e.usage==='משותף'?' on':''}"
+                onclick="setEntryField('${name}','${e.vol||null}','usage','משותף');renderContainerSubs()">👥 משותף</div>
+              <div class="rb${e.usage==='אישי'?' on':''}"
+                onclick="setEntryField('${name}','${e.vol||null}','usage','אישי');renderContainerSubs()">👤 אישי</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function onFreqChange(ctype, vol, val) {
+  const e = containers.find(e=>e.ctype===ctype && e.vol==vol);
+  if (e) { e.freq=val; }
+  const ek = entryKey({ctype, vol: vol==='null'?null:vol});
+  const otWrap = document.getElementById('freqot-'+ek);
+  if (otWrap) otWrap.classList.toggle('hidden', val!=='אחר');
+}
+
+function setEntryFieldDirect(ctype, vol, field, value) {
+  const e = containers.find(e=>e.ctype===ctype && e.vol==vol);
+  if (e) e[field] = value;
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  PROGRESS
+// ╚══════════════════════════════════════════════════════════╝
+function prog() {
+  let n=0;
+  if(gv('f_bn'))   n++;
+  if(gv('f_bid'))  n++;
+  if(gv('f_addr')) n++;
+  if(opts.sector)  n++;
+  if(opts.decl_given) n++;
+  const p=Math.round(n/5*100);
+  document.getElementById('pf').style.width=p+'%';
+  document.getElementById('pp').textContent=p+'%';
+}
+function gv(id){ return (document.getElementById(id)?.value||'').trim(); }
+
+// ╔══════════════════════════════════════════════════════════╗
+//  FILE UPLOADS
+// ╚══════════════════════════════════════════════════════════╝
+function addFiles(inp, type) {
+  const list=document.getElementById(type+'-list');
+  Array.from(inp.files).forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      uploads[type].push({name:f.name, data:e.target.result, mime:f.type});
+      const icon=f.type.startsWith('image/')?'🖼️':'📄';
+      const div=document.createElement('div'); div.className='fi';
+      div.innerHTML=`<span>${icon}</span><span class="fn">${f.name}</span><span class="fdl" onclick="this.parentNode.remove()">×</span>`;
+      list.appendChild(div);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  SIGNATURE
+// ╚══════════════════════════════════════════════════════════╝
+const cvs=document.getElementById('sc'), ctx=cvs.getContext('2d');
+let drawing=false;
+ctx.strokeStyle='#173404'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+function gp(e){const r=cvs.getBoundingClientRect();const s=e.touches?e.touches[0]:e;return{x:(s.clientX-r.left)*(cvs.width/r.width),y:(s.clientY-r.top)*(cvs.height/r.height)};}
+cvs.addEventListener('mousedown',e=>{drawing=true;const p=gp(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+cvs.addEventListener('mousemove',e=>{if(!drawing)return;const p=gp(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+cvs.addEventListener('mouseup',()=>drawing=false);
+cvs.addEventListener('mouseleave',()=>drawing=false);
+cvs.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=gp(e);ctx.beginPath();ctx.moveTo(p.x,p.y);},{passive:false});
+cvs.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=gp(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+cvs.addEventListener('touchend',()=>drawing=false);
+function clearSig(){ctx.clearRect(0,0,cvs.width,cvs.height);sigData=null;document.getElementById('sOk').style.display='none';document.getElementById('sPrev').innerHTML='';}
+function saveSig(){sigData=cvs.toDataURL('image/png');document.getElementById('sOk').style.display='flex';document.getElementById('sPrev').innerHTML='<img src="'+sigData+'"/>';toast('החתימה נשמרה','ok');}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  SAFE CONTAINERS PARSER
+//  Converts any stored shape (array, JSON string, object, null)
+//  into a guaranteed plain array. Called everywhere containers
+//  data is read — form fill, records view, and both exports.
+// ╚══════════════════════════════════════════════════════════╝
+function getSafeContainers(raw) {
+  if (!raw) return [];
+  // Already a proper array
+  if (Array.isArray(raw)) return raw;
+  // Serialised as a JSON string (can happen via some storage paths)
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_) { return []; }
+  }
+  // Legacy object map shape: { 'עגלה': {vol,qty,...} }
+  if (typeof raw === 'object') {
+    try {
+      return Object.entries(raw).map(([ctype, v]) => ({
+        ctype,
+        vol:       v.vol       || null,
+        qty:       v.qty       || null,
+        freq:      v.freq      || '',
+        freqOther: v.freqOther || '',
+        ownership: v.ownership || '',
+        usage:     v.usage     || ''
+      }));
+    } catch (_) { return []; }
+  }
+  return [];
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  SAVE / RESET / FILL
+// ╚══════════════════════════════════════════════════════════╝
+function buildRec() {
+  const bts=gv('f_bt')||document.getElementById('f_bt').value;
+  // Always serialise containers as a clean array — never as an object or string
+  const safeContainers = getSafeContainers(containers);
+  return {
+    id: editId||('r'+Date.now()), city:curCity,
+    biz_name:  gv('f_bn'),   biznum:   gv('f_bid'),
+    rep_name:  gv('f_rn'),   role:     gv('f_role'),
+    rep_phone: gv('f_rph'),  biz_phone:gv('f_bph'),
+    address:   gv('f_addr'),
+    biz_type:  bts==='אחר'?gv('f_bto'):bts,  biz_type_std:bts,
+    sector:    opts.sector||'', kitchen:opts.kitchen||'', yard:opts.yard||'',
+    yard_size: gv('f_ysz'),
+    containers: JSON.parse(JSON.stringify(safeContainers)), // deep clone, guaranteed array
+    wet:       opts.wet||'',   cardboard:opts.cardboard||'',
+    decl_given:opts.decl_given||'', decl_ret:opts.decl_ret||'',
+    emp_count: gv('f_emp'),
+    notes:     gv('f_notes'),
+    sig:       sigData,
+    imgs:      uploads.img.map(f=>({name:f.name,data:f.data,mime:f.mime})),
+    docs:      uploads.doc.map(f=>f.name),
+    date:      new Date().toLocaleDateString('he-IL'),
+    ts:        new Date().toISOString()
+  };
+}
+
+function save() {
+  if (!gv('f_bn')||!gv('f_bid')||!gv('f_addr')) { toast('יש למלא שם עסק, מספר ח.פ וכתובת','err'); return; }
+  const rec=buildRec();
+  if (editId) {
+    const i=DB.findIndex(x=>x.id===editId); if(i>=0) DB[i]=rec;
+    toast('הרשומה עודכנה','ok');
+  } else {
+    const ex=DB.findIndex(x=>x.biznum===rec.biznum);
+    if(ex>=0){ DB[ex]={...rec,id:DB[ex].id}; toast('עסק קיים עודכן','ok'); }
+    else { DB.push(rec); toast('הסקר נשמר ✅','ok'); }
+  }
+  localStorage.setItem('sv_db',JSON.stringify(DB));
+  upRC(); resetForm();
+}
+
+function fillForm(r) {
+  const sv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  sv('f_bn',r.biz_name); sv('f_bid',r.biznum);
+  sv('f_rn',r.rep_name); sv('f_role',r.role);
+  sv('f_rph',r.rep_phone); sv('f_bph',r.biz_phone);
+  sv('f_addr',r.address);
+  sv('f_bt',r.biz_type_std);
+  if(r.biz_type_std==='אחר'){document.getElementById('bt-other').classList.remove('hidden');sv('f_bto',r.biz_type);}
+  sv('f_ysz',r.yard_size); sv('f_emp',r.emp_count); sv('f_notes',r.notes);
+  ['sector','kitchen','yard','wet','cardboard','decl_given','decl_ret'].forEach(k=>{if(r[k])setOpt(k,r[k]);});
+  containers = JSON.parse(JSON.stringify(getSafeContainers(r.containers)));
+  // Restore ck checkmarks
+  document.querySelectorAll('.ck').forEach(el=>{
+    el.classList.toggle('sel', containers.some(e=>e.ctype===el.dataset.c));
+  });
+  renderContainerSubs();
+  if(r.sig){sigData=r.sig;document.getElementById('sOk').style.display='flex';document.getElementById('sPrev').innerHTML='<img src="'+r.sig+'"/>';}
+  prog();
+}
+
+function resetForm() {
+  ['f_bn','f_bid','f_rn','f_role','f_rph','f_bph','f_addr','f_bto','f_ysz','f_emp','f_notes'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('f_bt').value='';
+  document.getElementById('bt-other').classList.add('hidden');
+  document.getElementById('yard-sf').classList.add('hidden');
+  document.getElementById('emp-f').classList.add('hidden');
+  opts={};
+  document.querySelectorAll('.rb').forEach(el=>el.className='rb');
+  containers=[];
+  document.querySelectorAll('.ck').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('csubs').innerHTML='';
+  clearSig();
+  document.getElementById('img-list').innerHTML='';
+  document.getElementById('doc-list').innerHTML='';
+  uploads={img:[],doc:[]};
+  document.getElementById('stbar').style.display='none';
+  document.getElementById('sb').value='';
+  editId=null;
+  document.getElementById('fmode').textContent='סקר חדש';
+  document.getElementById('svbtn').textContent='💾 שמור סקר';
+  document.getElementById('pf').style.width='0%';
+  document.getElementById('pp').textContent='0%';
+  document.getElementById('f_city').value=curCity||'';
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  RECORDS VIEW
+// ╚══════════════════════════════════════════════════════════╝
+function renderRecs() {
+  const body=document.getElementById('rec-body');
+  if(!DB.length){body.innerHTML='<div class="empty"><div class="empty-i">🗂️</div><div>אין רשומות עדיין</div></div>';return;}
+  const cities={};
+  DB.forEach(r=>{const c=r.city||'?';if(!cities[c])cities[c]=[];cities[c].push(r);});
+  let html='';
+  Object.entries(cities).forEach(([city,recs])=>{
+    html+=`<div class="cb2"><div class="ch2">🏙️ ${city} <span style="font-weight:400;color:var(--g3)">(${recs.length})</span></div>`;
+    recs.forEach(r=>{
+      const cDesc = getSafeContainers(r.containers).map(e=>e.vol?`${e.ctype} ${e.vol}`:`${e.ctype}`).join(', ')||'';
+      html+=`<div class="rr2"><div class="rm">
+        <div class="rb2">${r.biz_name||r.biznum} <span style="font-weight:400;color:var(--tm);font-size:12px">${r.biznum}</span></div>
+        <div class="rd">${r.address||''} · ${r.biz_type||''} · ${cDesc}</div>
+      </div><div class="ra">
+        <button class="btn btn-s btn-sm" style="height:30px;padding:0 8px;font-size:12px" onclick="editRec('${r.id}')">✏️</button>
+        <button class="btn btn-d btn-sm" style="height:30px;padding:0 8px;font-size:12px" onclick="delRec('${r.id}')">🗑️</button>
+      </div></div>`;
+    });
+    html+='</div>';
+  });
+  body.innerHTML=html;
+}
+
+function editRec(id) {
+  const r=DB.find(x=>x.id===id);if(!r)return;
+  go('form');resetForm();fillForm(r);
+  document.getElementById('f_bid').value=r.biznum;
+  document.getElementById('sb').value=r.biznum;
+  editId=id;
+  document.getElementById('fmode').textContent='עריכה';
+  document.getElementById('svbtn').textContent='💾 עדכן';
+  const bar=document.getElementById('stbar');
+  bar.className='st-bar st-found';bar.innerHTML='✅ עסק קיים — הנתונים נטענו לעריכה';bar.style.display='flex';
+}
+
+function delRec(id) {
+  if(!confirm('למחוק?'))return;
+  DB=DB.filter(x=>x.id!==id);
+  localStorage.setItem('sv_db',JSON.stringify(DB));
+  upRC();renderRecs();toast('נמחק','ok');
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  EXPORT — SHARED HELPERS
+// ╚══════════════════════════════════════════════════════════╝
+function renderExp() {
+  const cities={};
+  DB.forEach(r=>{const c=r.city||'?';if(!cities[c])cities[c]=0;cities[c]++;});
+  ['chips-full','chips-calc'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!DB.length){el.innerHTML='<span style="font-size:13px;color:var(--tm)">אין נתונים לייצוא.</span>';return;}
+    el.innerHTML=Object.entries(cities).map(([c,n])=>`<div class="chip">${c} · ${n}</div>`).join('');
+  });
+}
+
+function groupByCity(data) {
+  return data.reduce((a,r)=>{const c=r.city||'?';if(!a[c])a[c]=[];a[c].push(r);return a;},{});
+}
+
+function safeSheet(city){ return city.replace(/[:\\/\?\*\[\]]/g,'_').slice(0,31); }
+
+function yn(v){ return v==='yes'?'כן':v==='no'?'לא':v||''; }
+
+function freqToMonthly(freq) {
+  if(!freq) return '';
+  const v=FREQ_MAP[freq];
+  return v!=null ? parseFloat(v.toFixed(4)) : '';
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  EXPORT A: FULL DATA
+//  Embeds signature & images as base64 into the Notes column
+//  (browser-side XLSX lib can't embed binary images natively;
+//   images are stored as visible data-URLs in dedicated cells
+//   so data is never lost — a server-side exceljs build can
+//   call addImage() to embed them as actual pictures)
+// ╚══════════════════════════════════════════════════════════╝
+function exportFull() {
+  // ── Guard: prevent double-click re-entry ──────────────────
+  const btn = document.querySelector('[onclick="exportFull()"]');
+  if (btn && btn.disabled) return;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ מייצא...'; }
+
+  const restoreBtn = () => {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇️ ייצא — קובץ נתונים מלא'; }
+  };
+
+  try {
+    if (!DB.length) { toast('אין נתונים לייצוא', 'err'); restoreBtn(); return; }
+
+    const wb = XLSX.utils.book_new();
+
+    // 31 columns: 23 data + signature + 3 images + 4 document slots
+    const headers = [
+      'שם העסק','מספר ח.פ/ע.מ/ת.ז','שם הנציג','תפקיד','טלפון נציג','טלפון עסק','כתובת','עיר',
+      'מהות העסק','מרכיב התאמה','מטבח פעיל','חצר','גודל חצר',
+      'כלי אצירה (פירוט)','בעלות','שימוש',
+      'פסולת מעורבת','פסולת קרטון',
+      'נמסרה הצהרה','הוחזרה הצהרה','מספר עובדים',
+      'הערות','תאריך',
+      'חתימה',
+      'תמונה 1','תמונה 2','תמונה 3',
+      'מסמך 1','מסמך 2','מסמך 3','מסמך 4'   // ← new dedicated document columns
+    ];
+    const COL_WIDTHS = [
+      18,18,16,14,14,14,24,12,
+      18,14,10,8,10,
+      48,12,12,
+      12,12,
+      12,12,12,
+      30,10,
+      22,                        // חתימה
+      22,22,22,                  // תמונות
+      28,28,28,28                // מסמכים
+    ];
+
+    // Helper: safely extract a string value from an img/doc slot.
+    // Slots are stored as {name, data, mime} objects OR legacy plain strings.
+    const slotStr = slot => {
+      if (!slot) return '';
+      if (typeof slot === 'string') return slot;                 // legacy: just a filename
+      // For images: embed the data-URL (truncated to SheetJS 32 KB cell limit)
+      if (slot.data && typeof slot.data === 'string') {
+        return slot.data.length > 30000 ? slot.data.slice(0, 30000) + '…' : slot.data;
+      }
+      return slot.name || '';                                    // fallback: show filename
+    };
+
+    // Helper: for documents we store only the filename (no base64 data captured in form)
+    const docStr = slot => {
+      if (!slot) return '';
+      if (typeof slot === 'string') return slot;
+      return slot.name || '';
+    };
+
+    const truncate = s => (typeof s === 'string' && s.length > 30000) ? s.slice(0, 30000) + '…' : (s || '');
+
+    const byCity = groupByCity(DB);
+    Object.entries(byCity).forEach(([city, recs]) => {
+      const rows = recs.map(r => {
+        // ── Safe container parse ──
+        const ctrs = getSafeContainers(r.containers);
+
+        const cDetail = ctrs.map(e => {
+          const vl = e.vol ? ` ${e.vol}ל׳` : '';
+          return `${e.ctype}${vl} ×${e.qty||'?'} | תדירות:${e.freq||'—'} | בעלות:${e.ownership||'—'} | שימוש:${e.usage||'—'}`;
+        }).join('\n');
+
+        // ── Images: exactly 3 fixed slots ──
+        const safeImgs = Array.isArray(r.imgs) ? r.imgs : [];
+        const img1 = truncate(slotStr(safeImgs[0]));
+        const img2 = truncate(slotStr(safeImgs[1]));
+        const img3 = truncate(slotStr(safeImgs[2]));
+
+        // ── Documents: exactly 4 fixed slots ──
+        // r.docs is stored as an array of filename strings (captured via the file-input)
+        const safeDocs = Array.isArray(r.docs) ? r.docs : [];
+        const doc1 = docStr(safeDocs[0]);
+        const doc2 = docStr(safeDocs[1]);
+        const doc3 = docStr(safeDocs[2]);
+        const doc4 = docStr(safeDocs[3]);
+
+        return [
+          r.biz_name   || '', r.biznum     || '', r.rep_name  || '', r.role      || '',
+          r.rep_phone  || '', r.biz_phone  || '', r.address   || '', r.city      || '',
+          r.biz_type   || '', r.sector     || '', yn(r.kitchen),     yn(r.yard),
+          r.yard_size  || '',
+          cDetail,
+          ctrs.map(e => e.ownership).filter(Boolean).join(', '),
+          ctrs.map(e => e.usage).filter(Boolean).join(', '),
+          r.wet        || '', r.cardboard  || '',
+          yn(r.decl_given), yn(r.decl_ret), r.emp_count || '',
+          r.notes      || '', r.date       || '',
+          truncate(r.sig || ''),
+          img1, img2, img3,
+          doc1, doc2, doc3, doc4
+        ];
+      });
+
+      // Verify every data row has exactly the same column count as headers
+      const expectedCols = headers.length;
+      rows.forEach((row, ri) => {
+        if (row.length !== expectedCols) {
+          console.warn(`exportFull: row ${ri} has ${row.length} cols, expected ${expectedCols}. Auto-padding.`);
+          while (row.length < expectedCols) row.push('');
+          if (row.length > expectedCols) row.splice(expectedCols);
+        }
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      ws['!cols'] = COL_WIDTHS.map(w => ({ wch: w }));
+      XLSX.utils.book_append_sheet(wb, ws, safeSheet(city));
+    });
+
+    XLSX.writeFile(wb, 'נתונים_מלאים_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+    toast('הקובץ יוצא ✅', 'ok');
+
+  } catch (err) {
+    // ── Visible error reporting — never fail silently ──
+    console.error('exportFull failed:', err);
+    const msg = err && err.message ? err.message : String(err);
+    toast('שגיאה בייצוא: ' + msg, 'err');
+    alert('שגיאה בייצוא קובץ הנתונים:\n\n' + msg + '\n\nבדוק את ה-Console לפרטים נוספים.');
+  } finally {
+    restoreBtn();
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+//  EXPORT B: CALCULATION — multi-row layout
+//
+//  Layout per business (Excel rows, 1-based):
+//    Header row         = row 1
+//    Data rows start    = row 2
+//
+//  Per business block:
+//    • N BREAKDOWN ROWS  — one per container entry (or 1 placeholder row if no containers)
+//    • 1 SUMMARY ROW     — totals + V formula
+//    • 1 BLANK SEPARATOR — visual spacing between businesses
+//
+//  KEY RULES applied here:
+//    1. getSafeContainers() wraps every r.containers access → no .map crashes
+//    2. Column B (Business Name) is populated on EVERY breakdown row (Rule A)
+//    3. Column O (=M*N) is written inline on EVERY breakdown row (Rule B)
+//    4. Summary row O still recalculates at the business level as SUM of breakdown O cells
+// ╚══════════════════════════════════════════════════════════╝
+function exportCalc() {
+  if(!DB.length){toast('אין נתונים','err');return;}
+  const wb=XLSX.utils.book_new();
+
+  // 22 columns A(0)…V(21)
+  const HEADERS=[
+    'מס׳ סידורי',              // A  col 0
+    'שם העסק',                 // B  col 1
+    'מספר העסק',               // C  col 2
+    'מהות העסק',               // D  col 3
+    'שם הנציג',                // E  col 4
+    'טלפון הנציג',             // F  col 5
+    'טלפון בעסק',              // G  col 6
+    'כתובת',                   // H  col 7
+    'מספר עובדים',             // I  col 8
+    '',                         // J  col 9   — ק"ג לעובד (blank, filled by operator)
+    'מרכיב התאמה',             // K  col 10  — 1.5 תעשייה / 2 מסחר
+    'מרכיב עידוד מחזור',       // L  col 11  — 0.8 לא מפנה / 1 אחר
+    'פסולת בסיסית ק"ג/חודש',  // M  col 12  — =I*J*K*L  (first breakdown row only)
+    '',                         // N  col 13  — עלות ק"ג  (blank, filled by operator)
+    'זיכוי פסולת בסיסית/חודש',// O  col 14  — =M*N  on EVERY breakdown row + summary
+    'כמות כלי אצירה',          // P  col 15
+    'סוג כלי אצירה',           // Q  col 16
+    '',                         // R  col 17  — עלות לפינוי (blank)
+    '',                         // S  col 18  — מקדם נפח    (blank)
+    'תדירות פינוי/חודש',       // T  col 19
+    'עלות פסולת כוללת/חודש',  // U  col 20  — =T*S*R*P
+    'סה"כ תשלום לחודש'         // V  col 21  — =U_summary - O_summary
+  ];
+
+  // Helpers
+  const sectorK    = r => r.sector==='תעשייה' ? 1.5 : r.sector==='מסחר' ? 2 : '';
+  const cardboardL = r => r.cardboard==='לא מפנה' ? 0.8
+                        : (r.cardboard==='רשות'||r.cardboard==='עצמי') ? 1 : '';
+
+  const byCity = groupByCity(DB);
+
+  Object.entries(byCity).forEach(([city, recs]) => {
+    const allRows = [HEADERS];
+    let excelRow  = 2;   // next 1-based Excel row to write (row 1 = header)
+    let serial    = 1;
+
+    recs.forEach(r => {
+      // ── Safety: always get a real array ──
+      const entries = getSafeContainers(r.containers);
+      // Guarantee at least one row per business (placeholder when no containers)
+      const rows = entries.length > 0 ? entries : [null];
+
+      const firstBreakRow = excelRow;
+      const lastBreakRow  = excelRow + rows.length - 1;
+      const summaryRow    = lastBreakRow + 1;
+
+      const K = sectorK(r);
+      const L = cardboardL(r);
+      const I = r.emp_count ? Number(r.emp_count) : '';
+
+      // ── BREAKDOWN ROWS ──────────────────────────────────────
+      rows.forEach((e, ei) => {
+        const BR  = excelRow;   // 1-based Excel row index for this breakdown row
+        const qty     = e ? (e.qty  || '') : '';
+        const desc    = e ? (e.vol  ? `${e.ctype} ${e.vol}` : `${e.ctype}`) : '';
+        const freqVal = e ? freqToMonthly(e.freq) : '';
+
+        const row = new Array(22).fill('');
+
+        // ── Columns A–H: business details on EVERY breakdown row ──
+        // A: serial number only on the first breakdown row of this business
+        row[0]  = ei === 0 ? serial       : '';
+        // B: Business name on EVERY row (Rule A — full traceability when filtering)
+        row[1]  = r.biz_name              || '';   // B — repeated on every breakdown row
+        // C–H: other business details only on first row (avoid visual clutter)
+        row[2]  = ei === 0 ? (r.biznum    || '') : '';  // C
+        row[3]  = ei === 0 ? (r.biz_type  || '') : '';  // D
+        row[4]  = ei === 0 ? (r.rep_name  || '') : '';  // E
+        row[5]  = ei === 0 ? (r.rep_phone || '') : '';  // F
+        row[6]  = ei === 0 ? (r.biz_phone || '') : '';  // G
+        row[7]  = ei === 0 ? (r.address   || '') : '';  // H
+
+        // ── I, J, K, L, M: employee / modifier block ──
+        // Only written on the first breakdown row (one value per business)
+        row[8]  = ei === 0 ? I  : '';  // I — employees
+        row[9]  = '';                  // J — blank (operator fills)
+        row[10] = ei === 0 ? K  : '';  // K — sector modifier
+        row[11] = ei === 0 ? L  : '';  // L — recycling modifier
+        // M: base waste formula — first breakdown row only; subsequent rows reference M of first row
+        row[12] = ei === 0
+          ? { f: `I${BR}*J${BR}*K${BR}*L${BR}` }
+          : '';                        // M
+
+        // ── N: blank (operator fills cost-per-kg) ──
+        row[13] = '';                  // N
+
+        // ── O: Inline =M*N on EVERY breakdown row (Rule B) ──
+        // On ei===0 the M cell is on the same row, so formula is =M{BR}*N{BR}
+        // On subsequent rows M is blank so formula correctly resolves to 0 (or blank when N is blank)
+        row[14] = { f: `M${BR}*N${BR}` };   // O — inline on every breakdown row
+
+        // ── P, Q: container quantities & description ──
+        row[15] = qty;                 // P — this container's quantity
+        row[16] = desc;                // Q — e.g. "דחסן 8"
+
+        // ── R, S: blank (operator fills) ──
+        row[17] = '';                  // R
+        row[18] = '';                  // S
+
+        // ── T: monthly frequency for THIS container entry ──
+        row[19] = freqVal !== '' ? freqVal : '';   // T
+
+        // ── U: cost formula per breakdown row ──
+        row[20] = { f: `T${BR}*S${BR}*R${BR}*P${BR}` };  // U
+
+        // ── V: blank on breakdown rows ──
+        row[21] = '';                  // V
+
+        allRows.push(row);
+        excelRow++;
+      });
+
+      // ── SUMMARY ROW ─────────────────────────────────────────
+      // Row index tracking:
+      //   startRowIndex        = firstBreakRow  (first breakdown row of this business)
+      //   currentSummaryRowIndex = summaryRow   (the row immediately after all breakdowns)
+      //
+      // Column V formula: =U{currentSummaryRowIndex} - O{startRowIndex}
+      //   U on the summary row = SUM of all breakdown U cells = total monthly waste cost
+      //   O on the first breakdown row = inline M*N = base-waste credit (printed once, row 1 of block)
+      //
+      // Example — business with 2 containers spanning Excel rows 2,3,4:
+      //   startRowIndex = 2, lastBreakRow = 3, currentSummaryRowIndex = 4
+      //   V4 = U4 - O2   ← exactly as specified
+
+      const startRowIndex        = firstBreakRow;   // alias for spec clarity
+      const currentSummaryRowIndex = summaryRow;    // alias for spec clarity
+
+      const SR      = currentSummaryRowIndex;
+      const pRange  = `P${startRowIndex}:P${lastBreakRow}`;
+      const oRange  = `O${startRowIndex}:O${lastBreakRow}`;
+      const uRange  = `U${startRowIndex}:U${lastBreakRow}`;
+      const tRange  = `T${startRowIndex}:T${lastBreakRow}`;
+
+      const sumRow  = new Array(22).fill('');
+      sumRow[1]  = r.biz_name || '';                          // B — business name
+      sumRow[14] = { f: `SUM(${oRange})` };                  // O — sum of inline O credits above
+      sumRow[15] = { f: `SUM(${pRange})` };                  // P — total container quantity
+      sumRow[16] = 'סה"כ כלי אצירה לעסק';                   // Q — label
+      sumRow[19] = { f: `SUM(${tRange})` };                  // T — combined monthly frequency
+      sumRow[20] = { f: `SUM(${uRange})` };                  // U — total monthly waste cost
+      // V: summary row's U  MINUS  first breakdown row's O
+      // =U{currentSummaryRowIndex} - O{startRowIndex}
+      sumRow[21] = { f: `U${currentSummaryRowIndex}-O${startRowIndex}` }; // V — net monthly payment
+
+      allRows.push(sumRow);
+      excelRow++;   // advance past summary row
+
+      serial++;
+
+      // Blank separator row between businesses
+      allRows.push(new Array(22).fill(''));
+      excelRow++;
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(allRows);
+    ws['!cols'] = [5,22,16,18,14,14,14,24,8,8,10,10,14,8,14,8,22,8,8,12,14,14].map(w=>({wch:w}));
+    XLSX.utils.book_append_sheet(wb, ws, safeSheet(city));
+  });
+
+  XLSX.writeFile(wb, 'תחשיב_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  toast('קובץ תחשיב יוצא ✅', 'ok');
+}
+
+// ── INIT ──
+document.getElementById('f_city').value='';
+</script>
+</body>
+</html>

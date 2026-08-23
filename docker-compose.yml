@@ -1,0 +1,163 @@
+name: shalev-surveys
+
+# ---------------------------------------------------------------------------
+#  Municipal survey management system
+#
+#  Every piece of state lives in a named volume, so `docker compose down` and a
+#  rebuild never lose data:
+#    mongo_data     - the database itself (documents + GridFS attachments)
+#    mongo_config   - mongod internal configuration
+#    mongo_backups  - nightly mongodump archives
+#    app_logs       - application logs
+#
+#  Nothing is published to the public internet: the API listens on the loopback
+#  interface only and Cloudflare Tunnel reaches it over the internal network.
+# ---------------------------------------------------------------------------
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: shalev-mongo
+    restart: unless-stopped
+    command: ["--auth", "--bind_ip_all", "--wiredTigerCacheSizeGB", "1"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?set MONGO_ROOT_USER in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?set MONGO_ROOT_PASSWORD in .env}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-surveys}
+      APP_DB: ${MONGO_DB:-surveys}
+      APP_USER: ${MONGO_APP_USER:-surveys_app}
+      APP_PASSWORD: ${MONGO_APP_PASSWORD:?set MONGO_APP_PASSWORD in .env}
+      TZ: ${TIMEZONE:-Asia/Jerusalem}
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+      - ./mongo/init:/docker-entrypoint-initdb.d:ro
+    networks: [internal]
+    # No ports section on purpose - the database is never reachable from outside
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: shalev-surveys-api:latest
+    container_name: shalev-api
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      MONGO_HOST: mongo
+      MONGO_PORT: "27017"
+      TZ: ${TIMEZONE:-Asia/Jerusalem}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - app_logs:/app/logs
+    networks: [internal]
+    ports:
+      # Loopback only. Cloudflare Tunnel talks to http://api:8000 internally.
+      - "127.0.0.1:${API_LOCAL_PORT:-8080}:8000"
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    logging: *default-logging
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: shalev-surveys-api:latest
+    container_name: shalev-worker
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    # The scheduler serves no HTTP port, so the image healthcheck does not apply
+    healthcheck:
+      disable: true
+    env_file: [.env]
+    environment:
+      MONGO_HOST: mongo
+      MONGO_PORT: "27017"
+      TZ: ${TIMEZONE:-Asia/Jerusalem}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - app_logs:/app/logs
+    networks: [internal]
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  backup:
+    build:
+      context: .
+      dockerfile: backup/Dockerfile
+    image: shalev-surveys-backup:latest
+    container_name: shalev-backup
+    restart: unless-stopped
+    environment:
+      MONGO_HOST: mongo
+      MONGO_PORT: "27017"
+      MONGO_DB: ${MONGO_DB:-surveys}
+      MONGO_ROOT_USER: ${MONGO_ROOT_USER}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_HOUR: ${BACKUP_HOUR:-2}
+      BACKUP_MINUTE: ${BACKUP_MINUTE:-0}
+      TZ: ${TIMEZONE:-Asia/Jerusalem}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - mongo_backups:/backups
+    networks: [internal]
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: shalev-tunnel
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+      TZ: ${TIMEZONE:-Asia/Jerusalem}
+    depends_on:
+      api:
+        condition: service_started
+    networks: [internal]
+    profiles: ["tunnel"]
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    name: shalev_mongo_data
+  mongo_config:
+    name: shalev_mongo_config
+  mongo_backups:
+    name: shalev_mongo_backups
+  app_logs:
+    name: shalev_app_logs

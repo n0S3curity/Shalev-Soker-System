@@ -1,0 +1,40 @@
+fixes:
+
+read the html file in the folder. i want you to covert that into a scalable real system software 
+1- use mongodb as database 
+2 - python fot running the backend 
+3 - docker to run it all as container with docker-compose.yml file for easy run (with volume, i want the db to be fully backed ap always) 
+4 - security - make sure to secure the server from mainly owasp-top-10 (take into account that ill use cloudflared tunnel)
+- you can choose if you want to use it as is as html or convert to other frontend framework (react or somthing, take into account that i need to set it as docker quiqly and i dont want maintannce)
+- docker: should saveall files in volumes to not loose when updating the docker container
+
+this is a form-managment system for business owner that gives service for Municipalities by his workers.
+
+fixes and improvements:
+	- create users login logic, by google emails only (no validations needed, OTP or etc. ), no registrations only login - the mail "mosseriy1@gmail.com" will be the admin that adds users.
+	- when user/admin gets into a filled form, he should be adble to see and edit all data on the form' see(in preview) and open all files there. signes should not be edited.
+
+
+added features:
+	- let the users take a pics directly from the form
+	- daily Excel form mail sent to the owner:  "mosseriy1@gmail.com" from his mail
+	
+admin capabilies and screens:
+	- add users to have access
+	- export to Excel(תחשיב וקובץ מלא)
+	- add Municipality cities
+	- screen: users managment (add delete edit)
+	
+users capabilties:
+	- fill forms for any Municipality and save them
+	- edit forms filled for any Municipality
+	- 
+	
+screens flow:
+	login page > admin > admin panel > choose a Municipality > see all his data and export to Excel
+	login page > user > choose between Municipality city (e.g רחובות, תל אביב) > can fill the form compleatly. > can edit previous forms that filled
+	
+	
+	
+
+ask for eage cases or further questions if you have.
