@@ -296,13 +296,44 @@ Tune with `BACKUP_HOUR`, `BACKUP_MINUTE`, `BACKUP_RETENTION_DAYS` in `.env`.
 
 ## 9. Updating
 
+Use the maintenance script. It takes a database dump **before** touching
+anything, pulls the latest code and base images, rebuilds, waits for every
+service to report healthy, checks the API can still reach Mongo, and reclaims
+the disk left behind by the previous image layers:
+
 ```bash
-docker compose pull
+bash scripts/update.sh
+```
+
+It asks for confirmation first. Add `-y` to skip the prompt, and `--rollback`
+to have it return to the previous commit automatically if the new build does
+not come up healthy:
+
+```bash
+bash scripts/update.sh -y --rollback
+```
+
+`bash scripts/update.sh --help` lists every option (`--no-git`, `--no-backup`,
+`--no-prune`). To run it unattended — monthly, at 03:30, logged — add this with
+`crontab -e`:
+
+```bash
+30 3 1 * * cd /srv/shalev && bash scripts/update.sh -y >> /var/log/shalev-update.log 2>&1
+```
+
+The pre-update dumps land in the same volume as the nightly ones, named
+`preupdate-<timestamp>.archive.gz`, and are pruned on the same
+`BACKUP_RETENTION_DAYS` schedule. Restore from one exactly as in §8.
+
+The equivalent by hand is:
+
+```bash
+docker compose pull --ignore-buildable
 docker compose up -d --build
 ```
 
-Containers are replaced; the four named volumes are untouched, so surveys, files,
-backups and logs all survive. Nothing in the images holds state.
+Either way, containers are replaced but the four named volumes are untouched, so
+surveys, files, backups and logs all survive. Nothing in the images holds state.
 
 ---
 
