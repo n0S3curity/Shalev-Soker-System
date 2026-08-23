@@ -457,6 +457,18 @@ window.SurveyForm = (function () {
     document.body.classList.toggle('readonly', disabled);
   }
 
+  /* True when this is an unsaved survey the user has already put something
+     into. App.setCity uses it to decide whether switching municipality may
+     safely start a fresh form or has to keep what is on screen. */
+  function isNewAndDirty() {
+    if (!state || state.surveyId) return false;
+    if (TEXT_FIELDS.some((id) => value(id))) return true;
+    if ($('f_bt').value) return true;
+    if (Object.keys(state.opts).length) return true;
+    return !!(state.containers.length || state.images.length ||
+              state.docs.length || state.signature);
+  }
+
   /* ── Load / reset ──────────────────────────────────────────────── */
   function reset(keepSearch) {
     state = blankState();
@@ -722,6 +734,7 @@ window.SurveyForm = (function () {
     loadCatalog: loadCatalog,
     reset: reset,
     open: open,
+    isNewAndDirty: isNewAndDirty,
     get state() { return state; }
   };
 })();

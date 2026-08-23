@@ -6,11 +6,12 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#173404"/>
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#171C15" media="(prefers-color-scheme: dark)"/>
 <meta name="referrer" content="strict-origin-when-cross-origin"/>
 <title>מערכת סקרים עירוניים</title>
 <link rel="stylesheet" href="/static/css/app.css"/>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23639922' d='M12 2L2 7l10 5 10-5-10-5z'/%3E%3C/svg%3E"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%233F7C29' d='M12 2L2 7l10 5 10-5-10-5z'/%3E%3C/svg%3E"/>
 </head>
 <body>
 
@@ -145,6 +146,20 @@
 
   <!-- ─────────── FORM ─────────── -->
   <section id="panel-form" class="panel hidden">
+
+    <!-- The survey belongs to a municipality, so the form stays behind this
+         gate until one is picked. Choosing a city used to wipe a form that
+         was already filled in; now there is nothing to wipe. -->
+    <div id="form-city-gate" class="gate hidden">
+      <div class="gate-card">
+        <div class="gate-icon">🏙️</div>
+        <h2 class="gate-title">קודם כל בחרו רשות מקומית</h2>
+        <p class="gate-text">הסקר משויך לרשות שבה ממוקם העסק, לכן יש לבחור אותה לפני מילוי הטופס. אפשר להחליף רשות בכל שלב — מה שמולא בטופס יישמר.</p>
+        <div id="form-city-grid" class="city-grid"></div>
+      </div>
+    </div>
+
+    <div id="form-live">
     <div class="s-row">
       <input class="s-inp" id="search-biznum" type="text" inputmode="numeric"
              placeholder="חיפוש לפי מספר ח.פ/ע.מ/ת.ז…" autocomplete="off"/>
@@ -341,6 +356,7 @@
       <button class="btn btn-s btn-sm" id="btn-form-reset">ניקוי</button>
       <button class="btn btn-p" id="btn-save">💾 שמור סקר</button>
     </div>
+    </div><!-- /#form-live -->
   </section>
 
   <!-- ─────────── RECORDS ─────────── -->

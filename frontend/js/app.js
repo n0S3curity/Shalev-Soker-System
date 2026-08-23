@@ -68,6 +68,7 @@ window.App = (function () {
     if (tab === 'settings') { Admin.loadSettings(); Admin.loadAudit(); }
     if (tab === 'dashboard') Admin.loadDashboard();
     if (tab === 'city') renderCityPicker();
+    if (tab === 'form') applyFormGate();
     if (tab === 'export') Admin.renderExportChips(app.cities);
     if (tab === 'account') Admin.loadAccount();
   }
@@ -92,32 +93,47 @@ window.App = (function () {
       setCity(null, false);
     }
     renderCityPicker();
+    applyFormGate();
     refreshCounts();
   }
 
-  function renderCityPicker() {
-    const grid = $('city-grid');
+  /* One renderer for both pickers: the "רשות" tab and the survey gate. */
+  function fillCityGrid(grid) {
     if (!grid) return;
     UI.clear(grid);
 
     if (!app.cities.length) {
       grid.appendChild(UI.emptyState('🏙️',
-        app.user.role === 'admin'
+        app.user && app.user.role === 'admin'
           ? 'אין רשויות. הוסף רשות במסך "רשויות".'
           : 'אין רשויות פעילות. פנה למנהל המערכת.'));
       return;
     }
 
     app.cities.forEach((city) => {
-      const button = el('button', {
+      grid.appendChild(el('button', {
         class: 'city-btn' + (city.name === app.city ? ' sel' : ''),
         onclick: () => { setCity(city.name, true); }
       }, [
         document.createTextNode(city.name),
         el('small', { text: city.survey_count + ' סקרים' })
-      ]);
-      grid.appendChild(button);
+      ]));
     });
+  }
+
+  function renderCityPicker() {
+    fillCityGrid($('city-grid'));
+    fillCityGrid($('form-city-grid'));
+  }
+
+  /* A survey has to belong to a municipality, so the form itself stays behind
+     a chooser until one is active. Before this gate existed you could fill the
+     whole form and only be told at save time - and picking a city at that
+     point reset everything that had been typed. */
+  function applyFormGate() {
+    const missing = !app.city;
+    UI.show($('form-city-gate'), missing);
+    UI.show($('form-live'), !missing);
   }
 
   function setCity(name, navigate) {
@@ -128,12 +144,20 @@ window.App = (function () {
     $('f_city').value = name || '';
     refreshCounts();
     renderCityPicker();
+    applyFormGate();
 
-    if (navigate) {
-      SurveyForm.reset(false);
-      go('form');
-      UI.toast('העיר הפעילה: ' + name, 'ok');
-    }
+    if (!navigate) return;
+
+    // Choosing a city must never throw away work in progress. A part filled
+    // new survey keeps everything and simply adopts the city; only a loaded
+    // existing record starts over, because that record belongs to its own city.
+    const kept = SurveyForm.isNewAndDirty();
+    if (!kept) SurveyForm.reset(false);
+    applyFormGate();
+    go('form');
+    UI.toast(kept
+      ? 'הרשות הוחלפה ל' + name + ' — הנתונים שמילאת נשמרו'
+      : 'הרשות הפעילה: ' + name, 'ok');
   }
 
   function refreshCounts() {
