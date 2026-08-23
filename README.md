@@ -59,11 +59,34 @@ and the “forgot my password” reset links, so Gmail needs an app password:
 
 ### 2.3 Configuration file
 
+Secrets are never committed, so a fresh clone has no `.env` and the stack will
+refuse to start until you create one. The quickest way is the bundled script,
+which copies `.env.example` and fills in strong random values for
+`MONGO_ROOT_PASSWORD`, `MONGO_APP_PASSWORD` and `SESSION_SECRET`:
+
+```bash
+bash scripts/setup-env.sh
+```
+
+On Windows PowerShell:
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts\setup-env.ps1
+```
+
+Neither script ever overwrites an existing `.env`.
+
+Then open `.env` and set the two values only you can supply:
+
+- `PUBLIC_ORIGIN` — the exact origin the browser uses
+  (`http://localhost:8080` for a local run)
+- `SMTP_PASSWORD` — the Gmail app password from §2.2, if you want mail
+
+To do it by hand instead, copy the template and replace every `CHANGE-ME`:
+
 ```bash
 cp .env.example .env
 ```
-
-Then edit `.env` and replace every `CHANGE-ME`. Generate the secrets with:
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(48))"
